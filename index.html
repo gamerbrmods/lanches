@@ -35,6 +35,35 @@
     }
 
 
+
+
+.produto-card {
+    background: #ffffff;
+    border-radius: 24px;
+    border: none; /* Remova a borda sólida */
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05); /* Sombra suave */
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.produto-card:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+}
+
+.produto-img {
+    border-radius: 24px 24px 0 0;
+    height: 200px;
+    transition: transform 0.5s;
+}
+
+.produto-card:hover .produto-img {
+    transform: scale(1.05); /* Zoom sutil na imagem ao passar o mouse */
+}
+    
+
+
+    
+
     textarea {
     width: 100%;
     padding: 14px;
@@ -189,9 +218,13 @@ textarea:focus {
 
     <div id="dados-cliente">
       <input type="text" id="nome" placeholder="Nome Completo">
-      <input type="email" id="email" placeholder="E-mail para receber o recibo">
-      <input type="number" id="número" placeholder="Número Para contato!">
-     <input type="text" id="endereco" placeholder="Endereço Completo de Entrega">
+      <input type="email" id="email" value="seuemail@exemplo.com" readonly>
+    
+    <input type="tel" id="número" placeholder="DDD + Número (Ex: 12999999999)" 
+           maxlength="11" 
+           oninput="this.value = this.value.replace(/[^0-9]/g, '');" 
+           required>
+      <input type="text" id="endereco" placeholder="Endereço Completo de Entrega" required>
      
      <textarea id="observação" placeholder="Adicionar observações à entrega..." rows="3"></textarea>
       
