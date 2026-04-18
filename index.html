@@ -332,11 +332,25 @@ textarea:focus {
       <input type="text" id="docNumber" placeholder="CPF do Titular">
     </div>
 
+    
+
+
     <div id="area-pix" style="display:none; text-align:center;">
-       <div id="qr-code-view" style="background: #f8f9fa; padding: 10px; border-radius: 10px; margin-bottom: 10px;"></div>
-       <p style="font-size: 0.8rem; color: #666; margin-bottom: 5px;">Copia e Cola:</p>
-       <input type="text" id="pix-copy" readonly style="text-align: center; font-size: 0.7rem; background: #eee;">
+    <div id="qr-code-view" style="background: #f8f9fa; padding: 10px; border-radius: 10px; margin-bottom: 10px;"></div>
+    
+    <p style="font-size: 0.8rem; color: #666; margin-bottom: 5px;">Copia e Cola:</p>
+    
+    <div style="display: flex; gap: 5px; margin-bottom: 10px;">
+        <input type="text" id="pix-copy" readonly 
+               style="flex: 1; margin-bottom: 0; font-size: 0.8rem; background: #eee; border: 1px solid #ddd;">
+        
+        <button onclick="copiarChave()" 
+                style="background: var(--secondary); color: white; border: none; padding: 0 15px; border-radius: 10px; cursor: pointer;">
+            <i class="fas fa-copy"></i>
+        </button>
     </div>
+  </div>
+    
 
     <button class="btn-finalizar" id="pagarBtn">Confirmar e Pagar</button>
     <div id="status" style="margin-top:15px; text-align:center; font-weight:600;"></div>
@@ -792,6 +806,39 @@ function displayPix(data) {
     resetBtn(btn);
   }
 });
+
+
+
+  function copiarChave() {
+    const inputPix = document.getElementById('pix-copy');
+    
+    if (inputPix.value === "") return;
+
+    // Seleciona o texto
+    inputPix.select();
+    inputPix.setSelectionRange(0, 99999); // Para dispositivos móveis
+
+    // Copia para a área de transferência
+    navigator.clipboard.writeText(inputPix.value).then(() => {
+        // Feedback visual para o usuário
+        const btn = event.currentTarget; // Pega o botão clicado
+        const originalIcon = btn.innerHTML;
+        
+        btn.innerHTML = '<i class="fas fa-check"></i>'; // Muda para check
+        btn.style.background = "#27ae60"; // Muda para verde
+        
+        mostrarAlerta("Copiado!", "Chave PIX copiada para a área de transferência.");
+
+        // Volta ao normal depois de 2 segundos
+        setTimeout(() => {
+            btn.innerHTML = originalIcon;
+            btn.style.background = "var(--secondary)";
+        }, 2000);
+    }).catch(err => {
+        console.error('Erro ao copiar: ', err);
+    });
+  }
+  
   
 </script>
 </body>
