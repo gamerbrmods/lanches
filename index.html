@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Lanchão Caraguá | Premium Delivery</title>
+  <title>Lanch茫o Caragu谩 | Premium Delivery</title>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
@@ -53,9 +53,9 @@
     .container { max-width: 1100px; margin: auto; display: grid; grid-template-columns: 1fr 380px; gap: 2rem; padding: 0 20px 40px; position: relative; }
 
     /* Mapa Flutuante */
-    #mini-mapa { position: fixed; bottom: 20px; left: 20px; width: 250px; height: 200px; border-radius: 20px; border: 3px solid white; box-shadow: 0 10px 20px rgba(0,0,0,0.2); z-index: 900; overflow: hidden; }
+    #mini-mapa { position: fixed; bottom: 20px; left: 20px; width: 150px; height: 100px; border-radius: 20px; border: 3px solid white; box-shadow: 0 10px 20px rgba(0,0,0,0.2); z-index: 500; overflow: hidden; }
 
-    /* Cardápio */
+    /* Card谩pio */
     .grid-produtos { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1.5rem; }
     .produto-card { background: var(--card-bg); border-radius: 20px; overflow: hidden; transition: transform 0.3s; box-shadow: 0 5px 15px rgba(0,0,0,0.05); border: 1px solid #eee; display: flex; flex-direction: column; }
     .produto-card:hover { transform: translateY(-5px); }
@@ -75,7 +75,7 @@
     .close-modal { position: absolute; top: 20px; right: 25px; font-size: 1.5rem; cursor: pointer; color: #999; }
     .btn-guest { background: none; border: 2px solid #ddd; width: 100%; padding: 12px; border-radius: 12px; margin-top: 10px; cursor: pointer; font-weight: 600; color: #666; }
 
-    /* Rodapé */
+    /* Rodap茅 */
     .footer { background: var(--secondary); color: white; padding: 4rem 1rem 2rem; text-align: center; margin-top: 50px; }
     .footer-content { max-width: 1100px; margin: auto; display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 3rem; text-align: left; }
     .footer h4 { color: var(--primary); margin-bottom: 20px; font-size: 1.2rem; }
@@ -145,7 +145,7 @@
     <i class="fas fa-user-circle"></i>
     <span>Minha Conta / Sair</span>
   </div>
-  <h1>🍔 Lanchão Caraguá</h1>
+  <h1>馃崝 Lanch茫o Caragu谩</h1>
   <p>O melhor sabor do litoral direto na sua mesa</p>
 </header>
 
@@ -161,9 +161,9 @@
   </div>
 
   <div class="checkout-side" id="area-pagamento">
-    <h3>🛒 Seu Pedido</h3>
+    <h3>馃洅 Seu Pedido</h3>
     <div id="lista-carrinho">
-      <p class="carrinho-vazio">Seu carrinho está vazio</p>
+      <p class="carrinho-vazio">Seu carrinho est谩 vazio</p>
     </div>
 
     <div class="total-box" id="total-display">R$ 0,00</div>
@@ -171,16 +171,16 @@
     <div id="dados-cliente">
       <input type="text" id="nome" placeholder="Nome Completo">
       <input type="email" id="email" placeholder="E-mail para receber o recibo">
-      <input type="nunber" id="número" placeholder="Número Para contato!">
-     <input type="text" id="endereco" placeholder="Endereço Completo de Entrega">
+      <input type="nunber" id="n煤mero" placeholder="N煤mero Para contato!">
+     <input type="text" id="endereco" placeholder="Endere莽o Completo de Entrega">
      
-      <input type="text" id="observação" placeholder="Adicionar observações à entrega...">
+      <input type="text" id="observa莽茫o" placeholder="Adicionar observa莽玫es 脿 entrega...">
     
     </div>
 
     <div class="tabs">
       <div id="tab-pix" class="tab active" onclick="setMetodo('pix')">PIX</div>
-      <div id="tab-card" class="tab" onclick="setMetodo('card')">Cartão</div>
+      <div id="tab-card" class="tab" onclick="setMetodo('card')">Cart茫o</div>
     </div>
 
     <div id="area-cartao" style="display:none;">
@@ -226,15 +226,15 @@
     <input type="password" placeholder="Crie uma Senha">
     <input type="password" placeholder="Confirme a Senha">
     <button class="btn-add" style="background:#27ae60;">Finalizar Cadastro</button>
-    <p style="margin-top: 20px; font-size: 0.85rem;">Já tem conta? <a href="javascript:void(0)" onclick="showAuth('login')" style="color: var(--primary); font-weight:700;">Fazer Login</a></p>
+    <p style="margin-top: 20px; font-size: 0.85rem;">J谩 tem conta? <a href="javascript:void(0)" onclick="showAuth('login')" style="color: var(--primary); font-weight:700;">Fazer Login</a></p>
   </div>
 </div>
 
 <footer class="footer">
   <div class="footer-content">
     <div>
-      <h4>🍔 Lanchão Caraguá</h4>
-      <p>Qualidade premium e entrega ultra rápida. O lanche que você respeita, na porta da sua casa.</p>
+      <h4>馃崝 Lanch茫o Caragu谩</h4>
+      <p>Qualidade premium e entrega ultra r谩pida. O lanche que voc锚 respeita, na porta da sua casa.</p>
     </div>
     <div>
       <h4>Central de Vendas</h4>
@@ -251,7 +251,7 @@
       </div>
     </div>
   </div>
-  <p style="margin-top: 50px; font-size: 0.8rem; opacity: 0.5;">&copy; 2026 Lanchão Caraguá. Feito com ❤️ no litoral.</p>
+  <p style="margin-top: 50px; font-size: 0.8rem; opacity: 0.5;">&copy; 2026 Lanch茫o Caragu谩. Feito com 鉂わ笍 no litoral.</p>
 </footer>
 
 
@@ -262,55 +262,33 @@
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
-  // 1. Configuração do Mapa
+
+
+
+
+
+
+
+    // --- 1. CONFIGURAÇÃO DO MAPA (LOJA FIXA) ---
   const map = L.map('mini-mapa', { 
-    zoomControl: false, 
-    attributionControl: false,
-    dragging: false, // Trava o mapa para focar na animação
-    scrollWheelZoom: false 
+    zoomControl: false, attributionControl: false 
   }).setView([-23.6226, -45.4124], 16);
 
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
   
-  // Ícone estilo WAZE (Carrinho Colorido)
-  const wazeIcon = L.divIcon({ 
-    html: `<div style="background: #33ccff; width: 22px; height: 22px; border-radius: 50% 50% 50% 0; transform: rotate(-45deg); border: 2px solid white; box-shadow: 0 2px 5px rgba(0,0,0,0.3); position: relative;">
-             <div style="width: 8px; height: 8px; background: white; border-radius: 50%; position: absolute; top: 4px; left: 4px;"></div>
+  const lojaIcon = L.divIcon({ 
+    html: `<div style="background: #e63946; width: 32px; height: 32px; border-radius: 50% 50% 50% 0; transform: rotate(-45deg); border: 3px solid white; box-shadow: 0 4px 10px rgba(0,0,0,0.3); display: flex; align-items: center; justify-content: center;">
+             <i class="fas fa-utensils" style="color: white; transform: rotate(45deg); font-size: 14px;"></i>
            </div>`, 
-    className: 'dummy' 
+    className: 'dummy', iconSize: [32, 32], iconAnchor: [16, 32]
   });
   
-  // Criamos motoboys (estilo Waze) em pontos estratégicos das ruas
-  const motoboys = [
-    { marker: L.marker([-23.6226, -45.4124], {icon: wazeIcon}).addTo(map), dir: 'lat', val: 0.00005 },
-    { marker: L.marker([-23.6215, -45.4110], {icon: wazeIcon}).addTo(map), dir: 'lng', val: -0.00005 },
-    { marker: L.marker([-23.6235, -45.4140], {icon: wazeIcon}).addTo(map), dir: 'lat', val: -0.00005 }
-  ];
+  
+  
+  L.marker([-23.6226, -45.4124], {icon: lojaIcon}).addTo(map)
+  
 
-  function moverMotoboys() {
-    motoboys.forEach(m => {
-      let curr = m.marker.getLatLng();
-      
-      // Move o motoboy apenas em uma direção por vez (como se estivesse em uma rua)
-      if (m.dir === 'lat') {
-        m.marker.setLatLng([curr.lat + m.val, curr.lng]);
-      } else {
-        m.marker.setLatLng([curr.lat, curr.lng + m.val]);
-      }
-
-      // Se andar muito (chegar em um "cruzamento" imaginário), ele muda de direção
-      if (Math.random() > 0.28) {
-        m.dir = m.dir === 'lat' ? 'lng' : 'lat'; // Vira a esquina
-        m.val = Math.random() > 0.5 ? 0.00005 : -0.00005; // Decide se vai pra frente ou trás
-      }
-
-      // Limite para não fugir do mapa de Caraguá
-      if (Math.abs(curr.lat - (-23.6226)) > 0.005) m.val *= -1;
-    });
-    setTimeout(() => { requestAnimationFrame(moverMotoboys); }, 50); // Reduzi a velocidade para ficar "certinho"
-  }
-  moverMotoboys();
-
+  
   // 2. Sistema de Troca Login/Cadastro
   function showAuth(type) {
     document.getElementById('auth-modal').style.display = 'flex';
@@ -327,12 +305,21 @@
     document.getElementById('auth-modal').style.display = 'none';
   }
 
-  // 3. Lógica do Cardápio
+  // 3. L贸gica do Card谩pio
   const produtos = [
     { id: 1, nome: "X-Salada Especial", preco: 25.0, desc: "Blend bovino 150g, queijo, alface e tomate.", img: "https://images.unsplash.com/photo-1572802419224-296b0aeee0d9?w=500" },
     { id: 2, nome: "Cheddar Bacon", preco: 32.9, desc: "Muito bacon crocante e cheddar cremoso.", img: "https://images.unsplash.com/photo-1594212699903-ec8a3eca50f5?w=500" },
-    { id: 3, nome: "Batata Suprema", preco: 18.0, desc: "Batatas rústicas com queijo e bacon.", img: "https://images.unsplash.com/photo-1573082883907-80c474345d31?w=500" },
-    { id: 4, nome: "Milkshake Oreo", preco: 15.0, desc: "Sorvete premium e pedaços de Oreo.", img: "https://images.unsplash.com/photo-1572490122747-3968b75cc699?w=500" }
+    { id: 3, nome: "Batata Suprema", preco: 18.0, desc: "Batatas r煤sticas com queijo e bacon.", img: "https://imagens.imirante.com.br/imagens/noticias/2024/04/07/kRzVAJoNICHti4nHq0VPYtK5tBWjWOzuOgYOmJNc.jpg?w=546&h=273&crop=730%2C+365%2C+0%2C+91.5&fit=crop&fm=webp&s=df4f113b656df4b3d3f5d9631c4a2d70" },
+    
+    
+
+    
+    
+    { id: 4, nome: "Milkshake Oreo", preco: 15.0, desc: "Sorvete premium e peda莽os de Oreo.", img: "https://images.unsplash.com/photo-1572490122747-3968b75cc699?w=500" },
+    
+    
+    
+            { id: 5, nome: "Coca Cola", preco: 12.0, desc: "Coca Cola 2L", img: "https://i5.walmartimages.com/asr/ecd01808-b785-4eaf-830d-81465657fa97.ed8ff2135314831c1c115a83cce1fcde.jpeg?odnHeight=768&odnWidth=768&odnBg=FFFFFF" }
   ];
 
   function renderMenu() {
@@ -363,7 +350,7 @@
     const total = carrinho.reduce((a, b) => a + b.preco, 0);
     
     if(carrinho.length === 0) {
-      lista.innerHTML = '<p class="carrinho-vazio">Seu carrinho está vazio</p>';
+      lista.innerHTML = '<p class="carrinho-vazio">Seu carrinho est谩 vazio</p>';
       totalDisplay.innerText = "R$ 0,00";
       return;
     }
@@ -413,7 +400,7 @@
     const totalDisplay = document.getElementById('total-display');
     
     if(carrinho.length === 0) {
-      lista.innerHTML = '<p class="carrinho-vazio">Seu carrinho está vazio</p>';
+      lista.innerHTML = '<p class="carrinho-vazio">Seu carrinho est谩 vazio</p>';
       totalDisplay.innerText = "R$ 0,00";
       return;
     }
@@ -424,7 +411,7 @@
       return `
         <div class="item-carrinho">
           <div><strong>${i.qtd}x</strong> ${i.nome}</div>
-          <div>R$ ${(i.preco * i.qtd).toFixed(2)} <span onclick="removerDoCarrinho(${i.id})" style="color:red; cursor:pointer; margin-left:10px; font-weight:bold;">✕</span></div>
+          <div>R$ ${(i.preco * i.qtd).toFixed(2)} <span onclick="removerDoCarrinho(${i.id})" style="color:red; cursor:pointer; margin-left:10px; font-weight:bold;">鉁�</span></div>
         </div>
       `;
     }).join('');
@@ -443,19 +430,19 @@
 
   document.getElementById('pagarBtn').addEventListener('click', async () => {
     const status = document.getElementById('status');
-    if(carrinho.length === 0) return alert("Seu carrinho está vazio!");
+    if(carrinho.length === 0) return alert("Seu carrinho est谩 vazio!");
 
     const email = document.getElementById('email').value;
     if(!email) return alert("Por favor, preencha seu e-mail.");
 
-    status.innerText = "🚀 Processando seu pedido...";
+    status.innerText = "馃殌 Processando seu pedido...";
     
     const total = carrinho.reduce((acc, i) => acc + (i.preco * i.qtd), 0);
 
     let payload = {
       type: metodo,
       amount: total,
-      description: "Pedido Lanchão Caraguá",
+      description: "Pedido Lanch茫o Caragu谩",
       payer: { email: email }
     };
 
@@ -473,7 +460,7 @@
         payload.paymentMethodId = "visa"; 
         payload.installments = 1;
       } catch(e) { 
-        status.innerText = "❌ Erro nos dados do cartão. Verifique e tente de novo.";
+        status.innerText = "鉂� Erro nos dados do cart茫o. Verifique e tente de novo.";
         return;
       }
     }
@@ -492,13 +479,13 @@
             document.getElementById('pix-copy').value = data.qr_code;
             status.innerHTML = "<span style='color:orange'>Aguardando pagamento...</span>";
         } else if(data.status === 'approved') {
-            status.innerHTML = "<span style='color:green'>✅ Pago com sucesso! Seu lanche já está na chapa.</span>";
+            status.innerHTML = "<span style='color:green'>鉁� Pago com sucesso! Seu lanche j谩 est谩 na chapa.</span>";
             carrinho = []; atualizarCarrinho();
         } else {
-            status.innerText = "❌ Falha: " + (data.status_detail || "Tente novamente");
+            status.innerText = "鉂� Falha: " + (data.status_detail || "Tente novamente");
         }
     } catch (err) {
-        status.innerText = "❌ Erro ao conectar com o servidor.";
+        status.innerText = "鉂� Erro ao conectar com o servidor.";
     }
   });
 
@@ -516,7 +503,6 @@
 
 
   
-
 
 
 
