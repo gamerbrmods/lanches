@@ -5,6 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Lanchão Caraguá | Premium Delivery</title>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <script src="https://sdk.mercadopago.com/js/v2"></script>
   <style>
     :root {
@@ -16,12 +18,19 @@
     }
 
     * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
-    html { scroll-behavior: smooth; } /* Rolagem suave */
-    body { background-color: var(--bg); color: var(--secondary); line-height: 1.6; }
+    html { scroll-behavior: smooth; }
+    body { background-color: var(--bg); color: var(--secondary); line-height: 1.6; overflow-x: hidden; }
+
+    /* Login Icon */
+    .user-auth { position: fixed; top: 20px; right: 20px; z-index: 1000; background: white; width: 50px; height: 50px; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 10px rgba(0,0,0,0.2); cursor: pointer; border: 2px solid var(--primary); transition: 0.3s; }
+    .user-auth:hover { transform: scale(1.1); }
 
     .header { background: var(--primary); color: white; padding: 3rem 2rem; text-align: center; border-bottom-left-radius: 40px; border-bottom-right-radius: 40px; margin-bottom: 2rem; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
 
-    .container { max-width: 1100px; margin: auto; display: grid; grid-template-columns: 1fr 380px; gap: 2rem; padding: 0 20px 40px; }
+    .container { max-width: 1100px; margin: auto; display: grid; grid-template-columns: 1fr 380px; gap: 2rem; padding: 0 20px 40px; position: relative; }
+
+    /* Mapa Flutuante */
+    #mini-mapa { position: fixed; bottom: 20px; left: 20px; width: 250px; height: 200px; border-radius: 20px; border: 3px solid white; box-shadow: 0 10px 20px rgba(0,0,0,0.2); z-index: 900; overflow: hidden; }
 
     /* Menu de Produtos */
     .grid-produtos { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1.5rem; }
@@ -34,34 +43,37 @@
     .produto-preco { color: var(--primary); font-weight: 700; font-size: 1.2rem; display: block; margin-bottom: 10px; }
     
     .btn-add { width: 100%; background: var(--primary); color: white; border: none; padding: 12px; border-radius: 12px; cursor: pointer; font-weight: 600; transition: 0.2s; }
-    .btn-add:hover { filter: brightness(1.1); transform: scale(1.02); }
 
     /* Checkout Sidebar */
     .checkout-side { background: white; border-radius: 25px; padding: 1.5rem; position: sticky; top: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); height: fit-content; border: 2px solid var(--primary); }
-    .checkout-side h3 { margin-bottom: 1rem; border-bottom: 2px solid #f8f9fa; padding-bottom: 10px; }
-    .carrinho-vazio { text-align: center; color: #888; padding: 20px; }
-    .item-carrinho { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; padding-bottom: 0.5rem; border-bottom: 1px solid #f0f0f0; font-size: 0.9rem; }
-    
     .total-box { font-size: 1.4rem; font-weight: 700; text-align: center; margin: 1.5rem 0; padding: 15px; background: #fff5f5; border-radius: 15px; color: var(--primary); border: 1px dashed var(--primary); }
 
-    /* Abas de Pagamento */
-    .tabs { display: flex; gap: 10px; margin-bottom: 1.5rem; }
-    .tab { flex: 1; padding: 10px; border-radius: 10px; text-align: center; cursor: pointer; background: #eee; font-size: 0.9rem; font-weight: 600; transition: 0.3s; }
-    .tab.active { background: var(--secondary); color: white; }
+    /* Modal Login */
+    .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 2000; align-items: center; justify-content: center; }
+    .modal-content { background: white; padding: 2rem; border-radius: 30px; width: 90%; max-width: 400px; text-align: center; position: relative; }
+    .close-modal { position: absolute; top: 15px; right: 20px; font-size: 1.5rem; cursor: pointer; }
+    .btn-guest { background: none; border: 2px solid #ddd; width: 100%; padding: 10px; border-radius: 10px; margin-top: 10px; cursor: pointer; font-weight: 600; }
 
-    input { width: 100%; padding: 12px; margin-bottom: 10px; border: 1.5px solid #eee; border-radius: 10px; outline: none; font-size: 0.9rem; }
-    input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(230, 57, 70, 0.1); }
-    
-    .btn-finalizar { width: 100%; background: #27ae60; color: white; border: none; padding: 15px; border-radius: 15px; font-size: 1.1rem; font-weight: 700; cursor: pointer; transition: 0.3s; margin-top: 10px; }
-    .btn-finalizar:hover { background: #219150; }
+    /* Rodapé */
+    .footer { background: var(--secondary); color: white; padding: 3rem 1rem; text-align: center; margin-top: 50px; }
+    .footer-content { max-width: 1100px; margin: auto; display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 2rem; text-align: left; }
+    .footer h4 { color: var(--primary); margin-bottom: 15px; }
+    .social-icons i { font-size: 1.5rem; margin-right: 15px; cursor: pointer; transition: 0.3s; }
+    .social-icons i:hover { color: var(--primary); }
+
+    input { width: 100%; padding: 12px; margin-bottom: 10px; border: 1.5px solid #eee; border-radius: 10px; outline: none; }
 
     @media (max-width: 850px) { 
       .container { grid-template-columns: 1fr; }
-      .checkout-side { position: relative; top: 0; margin-top: 2rem; }
+      #mini-mapa { width: 120px; height: 120px; bottom: 10px; left: 10px; }
     }
   </style>
 </head>
 <body>
+
+<div class="user-auth" onclick="toggleModal('login-modal')">
+  <i class="fas fa-user"></i>
+</div>
 
 <header class="header">
   <h1>🍔 Lanchão Caraguá</h1>
@@ -78,206 +90,123 @@
     <div id="lista-carrinho">
       <p class="carrinho-vazio">Seu carrinho está vazio</p>
     </div>
-
     <div class="total-box" id="total-display">R$ 0,00</div>
-
     <div id="dados-cliente">
       <input type="text" id="nome" placeholder="Nome Completo">
-      <input type="email" id="emaill" placeholder="E-mail para receber o recibo">
-      <input type="nunber" id="número" placeholder="Número Para contato!">
-     <input type="text" id="endereco" placeholder="Endereço Completo de Entrega">
-     
-      <input type="text" id="observação" placeholder="Adicionar observações à entrega...">
-    
+      <input type="email" id="email" placeholder="E-mail">
+      <input type="text" id="endereco" placeholder="Endereço de Entrega">
     </div>
-
-    <div class="tabs">
-      <div id="tab-pix" class="tab active" onclick="setMetodo('pix')">PIX</div>
-      <div id="tab-card" class="tab" onclick="setMetodo('card')">Cartão</div>
-    </div>
-
-    <div id="area-cartao" style="display:none;">
-      <input type="text" id="cardNumber" placeholder="0000 0000 0000 0000">
-      <div style="display:flex; gap:5px">
-        <input type="text" id="expMonth" placeholder="MM" maxlength="2">
-        <input type="text" id="expYear" placeholder="AAAA" maxlength="4">
-        <input type="text" id="cvv" placeholder="CVV" maxlength="4">
-      </div>
-      <input type="text" id="docNumber" placeholder="CPF do Titular">
-    </div>
-
-    <div id="area-pix" style="display:none; text-align:center;">
-       <div id="qr-code-view" style="background: #f8f9fa; padding: 10px; border-radius: 10px; margin-bottom: 10px;"></div>
-       <p style="font-size: 0.8rem; color: #666; margin-bottom: 5px;">Copia e Cola:</p>
-       <input type="text" id="pix-copy" readonly style="text-align: center; font-size: 0.7rem; background: #eee;">
-    </div>
-
     <button class="btn-finalizar" id="pagarBtn">Confirmar e Pagar</button>
-    <div id="status" style="margin-top:15px; text-align:center; font-weight:600;"></div>
+    <div id="status" style="margin-top:15px; text-align:center;"></div>
   </div>
 </div>
 
+<div id="mini-mapa"></div>
+
+<div class="modal" id="login-modal">
+  <div class="modal-content">
+    <span class="close-modal" onclick="toggleModal('login-modal')">&times;</span>
+    <h3 style="margin-bottom: 20px;">Bem-vindo de volta!</h3>
+    <input type="text" placeholder="Usuário ou E-mail">
+    <input type="password" placeholder="Senha">
+    <button class="btn-add" style="margin-top: 10px;">Entrar</button>
+    <button class="btn-guest" onclick="toggleModal('login-modal')">Continuar sem cadastro</button>
+    <p style="margin-top: 15px; font-size: 0.8rem;">Não tem conta? <a href="#" style="color: var(--primary);">Cadastre-se</a></p>
+  </div>
+</div>
+
+<footer class="footer">
+  <div class="footer-content">
+    <div>
+      <h4>Sobre Nós</h4>
+      <p>Lanchão Caraguá atua desde 2010 trazendo os melhores blends e ingredientes selecionados para Caraguatatuba.</p>
+    </div>
+    <div>
+      <h4>Contato</h4>
+      <p><i class="fas fa-phone"></i> (12) 99999-8888</p>
+      <p><i class="fas fa-envelope"></i> contato@lanchaocaragua.com.br</p>
+      <p><i class="fas fa-map-marker-alt"></i> Av. da Praia, Centro - Caraguá</p>
+    </div>
+    <div>
+      <h4>Siga-nos</h4>
+      <div class="social-icons">
+        <i class="fab fa-instagram"></i>
+        <i class="fab fa-facebook"></i>
+        <i class="fab fa-whatsapp"></i>
+      </div>
+    </div>
+  </div>
+  <p style="margin-top: 40px; font-size: 0.8rem; opacity: 0.6;">&copy; 2026 Lanchão Caraguá Premium. Todos os direitos reservados.</p>
+</footer>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
-  const mp = new MercadoPago('SUA_PUBLIC_KEY_AQUI'); 
-  let metodo = 'pix';
-  let carrinho = [];
+  // Configuração do Mapa e Motoboys
+  const map = L.map('mini-mapa', { zoomControl: false }).setView([-23.6226, -45.4124], 14);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+  
+  // Ícone Loja e Motoboy
+  const storeIcon = L.divIcon({ html: '<i class="fas fa-hamburger" style="color:#e63946; font-size: 20px;"></i>', className: 'dummy' });
+  const motoIcon = L.divIcon({ html: '<i class="fas fa-motorcycle" style="color:#1d3557; font-size: 18px;"></i>', className: 'dummy' });
+  
+  L.marker([-23.6226, -45.4124], {icon: storeIcon}).addTo(map).bindPopup("Lanchão Caraguá");
+
+  // Animação simples de motoboys
+  const motos = [
+    L.marker([-23.6250, -45.4150], {icon: motoIcon}).addTo(map),
+    L.marker([-23.6200, -45.4100], {icon: motoIcon}).addTo(map)
+  ];
+
+  setInterval(() => {
+    motos.forEach(m => {
+      let lat = m.getLatLng().lat + (Math.random() - 0.5) * 0.001;
+      let lng = m.getLatLng().lng + (Math.random() - 0.5) * 0.001;
+      m.setLatLng([lat, lng]);
+    });
+  }, 3000);
+
+  // Funções de Interface
+  function toggleModal(id) {
+    const modal = document.getElementById(id);
+    modal.style.display = modal.style.display === 'flex' ? 'none' : 'flex';
+  }
 
   const produtos = [
-    { 
-      id: 1, 
-      nome: "X-Salada Especial", 
-      preco: 25.00, 
-      desc: "Pão artesanal, blend bovino 150g, queijo prato, alface, tomate, cebola roxa e nossa maionese secreta.",
-      img: "https://images.unsplash.com/photo-1572802419224-296b0aeee0d9?w=500" 
-    },
-    { 
-      id: 2, 
-      nome: "Cheddar Bacon Insano", 
-      preco: 32.90, 
-      desc: "Hambúrguer grelhado no fogo alto, muito bacon crocante e uma generosa camada de cheddar cremoso.",
-      img: "https://images.unsplash.com/photo-1594212699903-ec8a3eca50f5?w=500" 
-    },
-    { 
-      id: 3, 
-      nome: "Batata Suprema", 
-      preco: 18.00, 
-      desc: "Porção individual de batatas rústicas cobertas com molho de queijos e farofa de bacon.",
-      img: "https://images.unsplash.com/photo-1573082883907-80c474345d31?w=500" 
-    },
-    { 
-      id: 4, 
-      nome: "Milkshake Oreo", 
-      preco: 0.10, 
-      desc: "Batido na hora com sorvete de baunilha premium e pedaços reais de biscoito Oreo.",
-      img: "https://images.unsplash.com/photo-1572490122747-3968b75cc699?w=500" 
-    }
+    { id: 1, nome: "X-Salada Especial", preco: 25.0, desc: "Blend bovino 150g, queijo, alface e tomate.", img: "https://images.unsplash.com/photo-1572802419224-296b0aeee0d9?w=500" },
+    { id: 2, nome: "Cheddar Bacon", preco: 32.9, desc: "Muito bacon crocante e cheddar cremoso.", img: "https://images.unsplash.com/photo-1594212699903-ec8a3eca50f5?w=500" },
+    { id: 3, nome: "Batata Suprema", preco: 18.0, desc: "Batatas rústicas com queijo e bacon.", img: "https://images.unsplash.com/photo-1573082883907-80c474345d31?w=500" },
+    { id: 4, nome: "Milkshake Oreo", preco: 15.0, desc: "Sorvete premium e pedaços de Oreo.", img: "https://images.unsplash.com/photo-1572490122747-3968b75cc699?w=500" }
   ];
 
   function renderMenu() {
-    const grid = document.getElementById('menu-produtos');
-    grid.innerHTML = produtos.map(p => `
+    document.getElementById('menu-produtos').innerHTML = produtos.map(p => `
       <div class="produto-card">
-        <img src="${p.img}" class="produto-img" alt="${p.nome}">
+        <img src="${p.img}" class="produto-img">
         <div class="produto-info">
           <h4>${p.nome}</h4>
           <p class="produto-desc">${p.desc}</p>
           <span class="produto-preco">R$ ${p.preco.toFixed(2)}</span>
-          <button class="btn-add" onclick="addCarrinho(${p.id})">Adicionar ao Pedido</button>
+          <button class="btn-add" onclick="addCarrinho(${p.id})">Adicionar</button>
         </div>
       </div>
     `).join('');
   }
 
+  let carrinho = [];
   function addCarrinho(id) {
-    const item = produtos.find(p => p.id === id);
-    const jaTem = carrinho.find(c => c.id === id);
-    if(jaTem) jaTem.qtd++;
-    else carrinho.push({...item, qtd: 1});
-    
+    const p = produtos.find(i => i.id === id);
+    carrinho.push(p);
     atualizarCarrinho();
-
-    // ROLAR PARA O PAGAMENTO
     document.getElementById('area-pagamento').scrollIntoView({ behavior: 'smooth' });
-  }
-
-  function removerDoCarrinho(id) {
-    carrinho = carrinho.filter(i => i.id !== id);
-    atualizarCarrinho();
   }
 
   function atualizarCarrinho() {
     const lista = document.getElementById('lista-carrinho');
-    const totalDisplay = document.getElementById('total-display');
-    
-    if(carrinho.length === 0) {
-      lista.innerHTML = '<p class="carrinho-vazio">Seu carrinho está vazio</p>';
-      totalDisplay.innerText = "R$ 0,00";
-      return;
-    }
-
-    let total = 0;
-    lista.innerHTML = carrinho.map(i => {
-      total += i.preco * i.qtd;
-      return `
-        <div class="item-carrinho">
-          <div><strong>${i.qtd}x</strong> ${i.nome}</div>
-          <div>R$ ${(i.preco * i.qtd).toFixed(2)} <span onclick="removerDoCarrinho(${i.id})" style="color:red; cursor:pointer; margin-left:10px; font-weight:bold;">✕</span></div>
-        </div>
-      `;
-    }).join('');
-    
-    totalDisplay.innerText = `R$ ${total.toFixed(2)}`;
+    const total = carrinho.reduce((a, b) => a + b.preco, 0);
+    lista.innerHTML = carrinho.map(i => `<div class="item-carrinho"><span>${i.nome}</span><span>R$ ${i.preco.toFixed(2)}</span></div>`).join('');
+    document.getElementById('total-display').innerText = `R$ ${total.toFixed(2)}`;
+    if(carrinho.length === 0) lista.innerHTML = '<p class="carrinho-vazio">Carrinho vazio</p>';
   }
-
-  function setMetodo(m) {
-    metodo = m;
-    document.getElementById('tab-pix').classList.toggle('active', m === 'pix');
-    document.getElementById('tab-card').classList.toggle('active', m === 'card');
-    document.getElementById('area-cartao').style.display = m === 'card' ? 'block' : 'none';
-    document.getElementById('area-pix').style.display = 'none';
-    document.getElementById('status').innerText = "";
-  }
-
-  document.getElementById('pagarBtn').addEventListener('click', async () => {
-    const status = document.getElementById('status');
-    if(carrinho.length === 0) return alert("Seu carrinho está vazio!");
-
-    const email = document.getElementById('email').value;
-    if(!email) return alert("Por favor, preencha seu e-mail.");
-
-    status.innerText = "🚀 Processando seu pedido...";
-    
-    const total = carrinho.reduce((acc, i) => acc + (i.preco * i.qtd), 0);
-
-    let payload = {
-      type: metodo,
-      amount: total,
-      description: "Pedido Lanchão Caraguá",
-      payer: { email: email }
-    };
-
-    if(metodo === 'card') {
-      try {
-        const tokenResp = await mp.fields.create('cardToken', {
-          cardNumber: document.getElementById('cardNumber').value,
-          expirationMonth: document.getElementById('expMonth').value,
-          expirationYear: document.getElementById('expYear').value,
-          securityCode: document.getElementById('cvv').value,
-          cardholderName: document.getElementById('nome').value,
-          identification: { type: 'CPF', number: document.getElementById('docNumber').value }
-        });
-        payload.token = tokenResp.id;
-        payload.paymentMethodId = "visa"; 
-        payload.installments = 1;
-      } catch(e) { 
-        status.innerText = "❌ Erro nos dados do cartão. Verifique e tente de novo.";
-        return;
-      }
-    }
-
-    try {
-        const resp = await fetch('/.netlify/functions/create-payment', {
-            method: 'POST',
-            body: JSON.stringify(payload)
-        });
-
-        const data = await resp.json();
-
-        if(metodo === 'pix' && data.qr_code) {
-            document.getElementById('area-pix').style.display = 'block';
-            document.getElementById('qr-code-view').innerHTML = `<img src="data:image/png;base64,${data.qr_code_base64}" width="180">`;
-            document.getElementById('pix-copy').value = data.qr_code;
-            status.innerHTML = "<span style='color:orange'>Aguardando pagamento...</span>";
-        } else if(data.status === 'approved') {
-            status.innerHTML = "<span style='color:green'>✅ Pago com sucesso! Seu lanche já está na chapa.</span>";
-            carrinho = []; atualizarCarrinho();
-        } else {
-            status.innerText = "❌ Falha: " + (data.status_detail || "Tente novamente");
-        }
-    } catch (err) {
-        status.innerText = "❌ Erro ao conectar com o servidor.";
-    }
-  });
 
   renderMenu();
 </script>
