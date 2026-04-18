@@ -12,116 +12,153 @@
       --secondary: #1d3557;
       --bg: #f8f9fa;
       --card-bg: #ffffff;
+      --text-muted: #6c757d;
     }
 
     * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
+    html { scroll-behavior: smooth; } /* Rolagem suave */
     body { background-color: var(--bg); color: var(--secondary); line-height: 1.6; }
 
-    .header { background: var(--primary); color: white; padding: 2rem; text-align: center; border-bottom-left-radius: 40px; border-bottom-right-radius: 40px; margin-bottom: 2rem; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+    .header { background: var(--primary); color: white; padding: 3rem 2rem; text-align: center; border-bottom-left-radius: 40px; border-bottom-right-radius: 40px; margin-bottom: 2rem; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
 
     .container { max-width: 1100px; margin: auto; display: grid; grid-template-columns: 1fr 380px; gap: 2rem; padding: 0 20px 40px; }
 
     /* Menu de Produtos */
-    .grid-produtos { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 1.5rem; }
-    .produto-card { background: var(--card-bg); border-radius: 20px; overflow: hidden; transition: transform 0.3s; box-shadow: 0 5px 15px rgba(0,0,0,0.05); border: 1px solid #eee; }
+    .grid-produtos { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1.5rem; }
+    .produto-card { background: var(--card-bg); border-radius: 20px; overflow: hidden; transition: transform 0.3s; box-shadow: 0 5px 15px rgba(0,0,0,0.05); border: 1px solid #eee; display: flex; flex-direction: column; }
     .produto-card:hover { transform: translateY(-5px); }
-    .produto-img { width: 100%; height: 160px; object-fit: cover; background: #ddd; }
-    .produto-info { padding: 1.2rem; }
-    .produto-preco { color: var(--primary); font-weight: 700; font-size: 1.2rem; display: block; margin: 0.5rem 0; }
-    .btn-add { width: 100%; background: var(--primary); color: white; border: none; padding: 10px; border-radius: 12px; cursor: pointer; font-weight: 600; transition: 0.2s; }
-    .btn-add:hover { filter: brightness(1.1); }
+    .produto-img { width: 100%; height: 180px; object-fit: cover; }
+    .produto-info { padding: 1.2rem; flex-grow: 1; display: flex; flex-direction: column; }
+    .produto-info h4 { font-size: 1.1rem; margin-bottom: 5px; }
+    .produto-desc { font-size: 0.85rem; color: var(--text-muted); margin-bottom: 15px; flex-grow: 1; }
+    .produto-preco { color: var(--primary); font-weight: 700; font-size: 1.2rem; display: block; margin-bottom: 10px; }
+    
+    .btn-add { width: 100%; background: var(--primary); color: white; border: none; padding: 12px; border-radius: 12px; cursor: pointer; font-weight: 600; transition: 0.2s; }
+    .btn-add:hover { filter: brightness(1.1); transform: scale(1.02); }
 
     /* Checkout Sidebar */
-    .checkout-side { background: white; border-radius: 25px; padding: 1.5rem; position: sticky; top: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); height: fit-content; }
+    .checkout-side { background: white; border-radius: 25px; padding: 1.5rem; position: sticky; top: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); height: fit-content; border: 2px solid var(--primary); }
+    .checkout-side h3 { margin-bottom: 1rem; border-bottom: 2px solid #f8f9fa; padding-bottom: 10px; }
     .carrinho-vazio { text-align: center; color: #888; padding: 20px; }
-    .item-carrinho { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; padding-bottom: 0.5rem; border-bottom: 1px solid #f0f0f0; }
+    .item-carrinho { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; padding-bottom: 0.5rem; border-bottom: 1px solid #f0f0f0; font-size: 0.9rem; }
     
-    .total-box { font-size: 1.4rem; font-weight: 700; text-align: center; margin: 1.5rem 0; padding: 15px; background: #fff5f5; border-radius: 15px; color: var(--primary); }
+    .total-box { font-size: 1.4rem; font-weight: 700; text-align: center; margin: 1.5rem 0; padding: 15px; background: #fff5f5; border-radius: 15px; color: var(--primary); border: 1px dashed var(--primary); }
 
     /* Abas de Pagamento */
     .tabs { display: flex; gap: 10px; margin-bottom: 1.5rem; }
-    .tab { flex: 1; padding: 10px; border-radius: 10px; text-align: center; cursor: pointer; background: #eee; font-size: 0.9rem; font-weight: 600; }
+    .tab { flex: 1; padding: 10px; border-radius: 10px; text-align: center; cursor: pointer; background: #eee; font-size: 0.9rem; font-weight: 600; transition: 0.3s; }
     .tab.active { background: var(--secondary); color: white; }
 
-    input { width: 100%; padding: 12px; margin-bottom: 10px; border: 1.5px solid #eee; border-radius: 10px; outline: none; }
-    input:focus { border-color: var(--primary); }
+    input { width: 100%; padding: 12px; margin-bottom: 10px; border: 1.5px solid #eee; border-radius: 10px; outline: none; font-size: 0.9rem; }
+    input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(230, 57, 70, 0.1); }
     
-    .btn-finalizar { width: 100%; background: #27ae60; color: white; border: none; padding: 15px; border-radius: 15px; font-size: 1.1rem; font-weight: 700; cursor: pointer; }
+    .btn-finalizar { width: 100%; background: #27ae60; color: white; border: none; padding: 15px; border-radius: 15px; font-size: 1.1rem; font-weight: 700; cursor: pointer; transition: 0.3s; margin-top: 10px; }
+    .btn-finalizar:hover { background: #219150; }
 
-    @media (max-width: 850px) { .container { grid-template-columns: 1fr; } }
+    @media (max-width: 850px) { 
+      .container { grid-template-columns: 1fr; }
+      .checkout-side { position: relative; top: 0; margin-top: 2rem; }
+    }
   </style>
 </head>
 <body>
 
 <header class="header">
   <h1>🍔 Lanchão Caraguá</h1>
-  <p>O melhor sabor do litoral no seu prato</p>
+  <p>O melhor sabor do litoral direto na sua mesa</p>
 </header>
 
 <div class="container">
   <div class="cardapio">
-    <div class="grid-produtos" id="menu-produtos">
-      </div>
+    <div class="grid-produtos" id="menu-produtos"></div>
   </div>
 
-  <div class="checkout-side">
-    <h3>Seu Pedido</h3>
+  <div class="checkout-side" id="area-pagamento">
+    <h3>🛒 Seu Pedido</h3>
     <div id="lista-carrinho">
       <p class="carrinho-vazio">Seu carrinho está vazio</p>
     </div>
 
     <div class="total-box" id="total-display">R$ 0,00</div>
 
-    <input type="text" id="nome" placeholder="Nome Completo">
-    <input type="email" id="email" placeholder="E-mail">
-    <input type="text" id="endereco" placeholder="Endereço Completo">
+    <div id="dados-cliente">
+      <input type="text" id="nome" placeholder="Nome Completo">
+      <input type="email" id="email" placeholder="E-mail para receber o recibo">
+      <input type="text" id="endereco" placeholder="Endereço Completo de Entrega">
+    </div>
 
     <div class="tabs">
-      <div class="tab active" onclick="setMetodo('pix')">PIX</div>
-      <div class="tab" onclick="setMetodo('card')">Cartão</div>
+      <div id="tab-pix" class="tab active" onclick="setMetodo('pix')">PIX</div>
+      <div id="tab-card" class="tab" onclick="setMetodo('card')">Cartão</div>
     </div>
 
     <div id="area-cartao" style="display:none;">
-      <input type="text" id="cardNumber" placeholder="Número do Cartão">
+      <input type="text" id="cardNumber" placeholder="0000 0000 0000 0000">
       <div style="display:flex; gap:5px">
-        <input type="text" id="expMonth" placeholder="MM">
-        <input type="text" id="expYear" placeholder="AAAA">
-        <input type="text" id="cvv" placeholder="CVV">
+        <input type="text" id="expMonth" placeholder="MM" maxlength="2">
+        <input type="text" id="expYear" placeholder="AAAA" maxlength="4">
+        <input type="text" id="cvv" placeholder="CVV" maxlength="4">
       </div>
-      <input type="text" id="docNumber" placeholder="CPF">
+      <input type="text" id="docNumber" placeholder="CPF do Titular">
     </div>
 
     <div id="area-pix" style="display:none; text-align:center;">
-       <div id="qr-code-view"></div>
-       <input type="text" id="pix-copy" readonly placeholder="Código Pix" onclick="this.select()">
+       <div id="qr-code-view" style="background: #f8f9fa; padding: 10px; border-radius: 10px; margin-bottom: 10px;"></div>
+       <p style="font-size: 0.8rem; color: #666; margin-bottom: 5px;">Copia e Cola:</p>
+       <input type="text" id="pix-copy" readonly style="text-align: center; font-size: 0.7rem; background: #eee;">
     </div>
 
-    <button class="btn-finalizar" id="pagarBtn">Pagar Agora</button>
-    <div id="status" style="margin-top:10px; text-align:center; font-weight:600;"></div>
+    <button class="btn-finalizar" id="pagarBtn">Confirmar e Pagar</button>
+    <div id="status" style="margin-top:15px; text-align:center; font-weight:600;"></div>
   </div>
 </div>
 
 <script>
-  const mp = new MercadoPago('SUA_PUBLIC_KEY_AQUI'); // <--- COLOQUE SUA KEY
+  const mp = new MercadoPago('SUA_PUBLIC_KEY_AQUI'); 
   let metodo = 'pix';
   let carrinho = [];
 
   const produtos = [
-    { id: 1, nome: "X-Salada Especial", preco: 25.00, img: "https://images.unsplash.com/photo-1572802419224-296b0aeee0d9?w=500" },
-    { id: 2, nome: "Cheddar Bacon", preco: 32.90, img: "https://images.unsplash.com/photo-1594212699903-ec8a3eca50f5?w=500" },
-    { id: 3, nome: "Batata Suprema", preco: 18.00, img: "https://images.unsplash.com/photo-1573082883907-80c474345d31?w=500" },
-    { id: 4, nome: "Milkshake Oreo", preco: 15.00, img: "https://images.unsplash.com/photo-1572490122747-3968b75cc699?w=500" }
+    { 
+      id: 1, 
+      nome: "X-Salada Especial", 
+      preco: 25.00, 
+      desc: "Pão artesanal, blend bovino 150g, queijo prato, alface, tomate, cebola roxa e nossa maionese secreta.",
+      img: "https://images.unsplash.com/photo-1572802419224-296b0aeee0d9?w=500" 
+    },
+    { 
+      id: 2, 
+      nome: "Cheddar Bacon Insano", 
+      preco: 32.90, 
+      desc: "Hambúrguer grelhado no fogo alto, muito bacon crocante e uma generosa camada de cheddar cremoso.",
+      img: "https://images.unsplash.com/photo-1594212699903-ec8a3eca50f5?w=500" 
+    },
+    { 
+      id: 3, 
+      nome: "Batata Suprema", 
+      preco: 18.00, 
+      desc: "Porção individual de batatas rústicas cobertas com molho de queijos e farofa de bacon.",
+      img: "https://images.unsplash.com/photo-1573082883907-80c474345d31?w=500" 
+    },
+    { 
+      id: 4, 
+      nome: "Milkshake Oreo", 
+      preco: 0.10, 
+      desc: "Batido na hora com sorvete de baunilha premium e pedaços reais de biscoito Oreo.",
+      img: "https://images.unsplash.com/photo-1572490122747-3968b75cc699?w=500" 
+    }
   ];
 
   function renderMenu() {
     const grid = document.getElementById('menu-produtos');
     grid.innerHTML = produtos.map(p => `
       <div class="produto-card">
-        <img src="${p.img}" class="produto-img">
+        <img src="${p.img}" class="produto-img" alt="${p.nome}">
         <div class="produto-info">
           <h4>${p.nome}</h4>
+          <p class="produto-desc">${p.desc}</p>
           <span class="produto-preco">R$ ${p.preco.toFixed(2)}</span>
-          <button class="btn-add" onclick="addCarrinho(${p.id})">Adicionar</button>
+          <button class="btn-add" onclick="addCarrinho(${p.id})">Adicionar ao Pedido</button>
         </div>
       </div>
     `).join('');
@@ -132,7 +169,11 @@
     const jaTem = carrinho.find(c => c.id === id);
     if(jaTem) jaTem.qtd++;
     else carrinho.push({...item, qtd: 1});
+    
     atualizarCarrinho();
+
+    // ROLAR PARA O PAGAMENTO
+    document.getElementById('area-pagamento').scrollIntoView({ behavior: 'smooth' });
   }
 
   function removerDoCarrinho(id) {
@@ -156,7 +197,7 @@
       return `
         <div class="item-carrinho">
           <div><strong>${i.qtd}x</strong> ${i.nome}</div>
-          <div>R$ ${(i.preco * i.qtd).toFixed(2)} <span onclick="removerDoCarrinho(${i.id})" style="color:red; cursor:pointer; margin-left:10px;">✕</span></div>
+          <div>R$ ${(i.preco * i.qtd).toFixed(2)} <span onclick="removerDoCarrinho(${i.id})" style="color:red; cursor:pointer; margin-left:10px; font-weight:bold;">✕</span></div>
         </div>
       `;
     }).join('');
@@ -166,26 +207,29 @@
 
   function setMetodo(m) {
     metodo = m;
-    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-    event.target.classList.add('active');
+    document.getElementById('tab-pix').classList.toggle('active', m === 'pix');
+    document.getElementById('tab-card').classList.toggle('active', m === 'card');
     document.getElementById('area-cartao').style.display = m === 'card' ? 'block' : 'none';
     document.getElementById('area-pix').style.display = 'none';
+    document.getElementById('status').innerText = "";
   }
 
   document.getElementById('pagarBtn').addEventListener('click', async () => {
     const status = document.getElementById('status');
-    if(carrinho.length === 0) return alert("Carrinho vazio!");
+    if(carrinho.length === 0) return alert("Seu carrinho está vazio!");
 
-    status.innerText = "Processando pagamento...";
+    const email = document.getElementById('email').value;
+    if(!email) return alert("Por favor, preencha seu e-mail.");
+
+    status.innerText = "🚀 Processando seu pedido...";
     
     const total = carrinho.reduce((acc, i) => acc + (i.preco * i.qtd), 0);
-    const payerEmail = document.getElementById('email').value;
 
     let payload = {
       type: metodo,
       amount: total,
       description: "Pedido Lanchão Caraguá",
-      payer: { email: payerEmail }
+      payer: { email: email }
     };
 
     if(metodo === 'card') {
@@ -199,31 +243,35 @@
           identification: { type: 'CPF', number: document.getElementById('docNumber').value }
         });
         payload.token = tokenResp.id;
-        payload.paymentMethodId = "visa"; // Simplificado para o exemplo
+        payload.paymentMethodId = "visa"; 
         payload.installments = 1;
       } catch(e) { 
-        status.innerText = "Erro nos dados do cartão";
+        status.innerText = "❌ Erro nos dados do cartão. Verifique e tente de novo.";
         return;
       }
     }
 
-    const resp = await fetch('/.netlify/functions/create-payment', {
-      method: 'POST',
-      body: JSON.stringify(payload)
-    });
+    try {
+        const resp = await fetch('/.netlify/functions/create-payment', {
+            method: 'POST',
+            body: JSON.stringify(payload)
+        });
 
-    const data = await resp.json();
+        const data = await resp.json();
 
-    if(metodo === 'pix' && data.qr_code) {
-      document.getElementById('area-pix').style.display = 'block';
-      document.getElementById('qr-code-view').innerHTML = `<img src="data:image/png;base64,${data.qr_code_base64}" width="150">`;
-      document.getElementById('pix-copy').value = data.qr_code;
-      status.innerText = "Aguardando pagamento via Pix...";
-    } else if(data.status === 'approved') {
-      status.innerText = "✅ Pagamento aprovado! Preparando seu lanche.";
-      carrinho = []; atualizarCarrinho();
-    } else {
-      status.innerText = "❌ Falha: " + (data.status_detail || "Tente novamente");
+        if(metodo === 'pix' && data.qr_code) {
+            document.getElementById('area-pix').style.display = 'block';
+            document.getElementById('qr-code-view').innerHTML = `<img src="data:image/png;base64,${data.qr_code_base64}" width="180">`;
+            document.getElementById('pix-copy').value = data.qr_code;
+            status.innerHTML = "<span style='color:orange'>Aguardando pagamento...</span>";
+        } else if(data.status === 'approved') {
+            status.innerHTML = "<span style='color:green'>✅ Pago com sucesso! Seu lanche já está na chapa.</span>";
+            carrinho = []; atualizarCarrinho();
+        } else {
+            status.innerText = "❌ Falha: " + (data.status_detail || "Tente novamente");
+        }
+    } catch (err) {
+        status.innerText = "❌ Erro ao conectar com o servidor.";
     }
   });
 
