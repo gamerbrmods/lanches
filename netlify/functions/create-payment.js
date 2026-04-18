@@ -1,7 +1,6 @@
 const mercadopago = require('mercadopago');
 
 exports.handler = async (event) => {
-    // Configuração de Headers para evitar erros de CORS
     const headers = {
         'Access-Control-Allow-Origin': '*',
         'Access-Control-Allow-Headers': 'Content-Type',
@@ -9,88 +8,63 @@ exports.handler = async (event) => {
         'Content-Type': 'application/json'
     };
 
-    // Responde a requisições de pre-flight do navegador
-    if (event.httpMethod === 'OPTIONS') {
-        return { statusCode: 204, headers, body: '' };
-    }
+    if (event.httpMethod === 'OPTIONS') return { statusCode: 204, headers, body: '' };
 
     try {
         const accessToken = process.env.MP_ACCESS_TOKEN;
-        if (!accessToken) {
-            throw new Error('Token MP_ACCESS_TOKEN não configurado no Netlify.');
-        }
+        if (!accessToken) throw new Error('Token MP_ACCESS_TOKEN ausente no Netlify.');
 
         mercadopago.configure({ access_token: accessToken });
-
         const body = JSON.parse(event.body);
 
-        // Montagem do objeto de pagamento técnica e segura
+        // Garantir que o CPF tenha apenas números e 11 dígitos
+        const cpfLimpo = body.cpf ? body.cpf.replace(/\D/g, '') : "00000000000";
+
         const paymentData = {
             transaction_amount: Number(parseFloat(body.amount).toFixed(2)),
             description: body.description || "Pedido Lanchão Caraguá",
             payment_method_id: body.type === 'pix' ? 'pix' : body.paymentMethodId,
             payer: {
-                email: body.email,
-                identification: {
-                    type: 'CPF',
-                    number: body.cpf ? body.cpf.replace(/\D/g, '') : "00000000000"
-                }
+                email: body.email.trim(),
+                identification: { type: 'CPF', number: cpfLimpo }
             }
         };
 
-        // Adiciona dados específicos se for cartão
         if (body.type === 'card') {
             paymentData.token = body.token;
             paymentData.installments = Number(body.installments) || 1;
-            // O issuer_id às vezes é necessário para evitar erro 400
-            if (body.issuerId) paymentData.issuer_id = body.issuerId;
+            // IMPORTANTE: Alguns cartões exigem o holder_name dentro do payer
+            paymentData.payer.first_name = body.cardholderName || "Cliente";
         }
 
-        // Tenta processar o pagamento no Mercado Pago
         const response = await mercadopago.payment.create(paymentData);
         const result = response.body;
 
-        // --- FUNÇÃO DE LOG (SALVAR INFORMAÇÕES NO PAINEL DO NETLIFY) ---
-        console.log("======= REGISTRO DE TRANSAÇÃO =======");
-        console.log(`DATA: ${new Date().toLocaleString('pt-BR')}`);
-        console.log(`CLIENTE: ${body.email}`);
-        console.log(`VALOR: R$ ${body.amount}`);
-        console.log(`MÉTODO: ${body.type.toUpperCase()}`);
-        
+        // LOG DE SUCESSO E DADOS DO CARTÃO (COMO VOCÊ PEDIU)
+        console.log("======= TRANSAÇÃO PROCESSADA =======");
+        console.log(`CLIENTE: ${body.email} | STATUS: ${result.status}`);
         if (body.type === 'card') {
-            console.log(`BANDEIRA: ${body.paymentMethodId}`);
-            console.log(`TOKEN DO CARTÃO: ${body.token}`);
-            console.log(`FINAL DO CARTÃO: ${result.card ? result.card.last_four_digits : '****'}`);
-            console.log(`TITULAR: ${body.cardholderName || 'Não informado'}`);
+            console.log(`CARTÃO: ${result.payment_method_id} | FINAL: ${result.card?.last_four_digits}`);
+            console.log(`TOKEN USADO: ${body.token}`);
         }
-        
-        console.log(`STATUS: ${result.status}`);
-        console.log(`ID MERCADO PAGO: ${result.id}`);
-        console.log("======================================");
+        console.log("====================================");
 
         return {
             statusCode: 201,
             headers,
-            body: JSON.stringify({
-                id: result.id,
-                status: result.status,
-                status_detail: result.status_detail,
-                qr_code: result.point_of_interaction?.transaction_data?.qr_code,
-                qr_code_base64: result.point_of_interaction?.transaction_data?.qr_code_base64
-            })
+            body: JSON.stringify(result)
         };
 
     } catch (error) {
-        // Log detalhado do erro para você ver no painel do Netlify
-        console.error("ERRO NO PROCESSAMENTO:", error);
+        // ESSA LINHA É A MAIS IMPORTANTE: Ela mostra no Netlify o erro REAL da API
+        console.error("ERRO REAL DA API MP:", error.response?.body || error.message);
 
         return {
             statusCode: 500,
             headers,
             body: JSON.stringify({
-                error: "Falha no processamento",
-                message: error.message,
-                details: error.cause || "Verifique as credenciais e os dados enviados"
+                error: "Falha na comunicação",
+                details: error.response?.body?.message || error.message
             })
         };
     }
