@@ -3,140 +3,231 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Lanchão Caraguá - Checkout Transparente</title>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <title>Lanchão Caraguá | Premium Delivery</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
   <script src="https://sdk.mercadopago.com/js/v2"></script>
   <style>
-    /* ... Seus estilos CSS permanecem os mesmos ... */
-    * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
-    body { background: #fefaf5; padding: 20px; }
-    .container { max-width: 1200px; margin: auto; display: flex; flex-wrap: wrap; gap: 2rem; }
-    .checkout { flex: 1.5; background: white; border-radius: 28px; padding: 1.5rem; box-shadow: 0 12px 28px rgba(0,0,0,0.08); }
-    .produto { background: white; border-radius: 20px; padding: 1rem; margin-bottom: 1rem; display: flex; justify-content: space-between; align-items: center; border: 1px solid #ffe0cc; }
-    button { background: #d13f1f; color: white; border: none; padding: 12px; border-radius: 40px; cursor: pointer; font-weight: 600; }
-    .pagamento-tabs { display: flex; gap: 10px; margin: 1rem 0; }
-    .tab { flex: 1; text-align: center; padding: 10px; background: #f0dbcf; border-radius: 40px; cursor: pointer; }
-    .tab.active { background: #d13f1f; color: white; }
-    input, select { width: 100%; padding: 10px; margin: 8px 0; border-radius: 12px; border: 1.5px solid #eee; }
+    :root {
+      --primary: #e63946;
+      --secondary: #1d3557;
+      --bg: #f8f9fa;
+      --card-bg: #ffffff;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
+    body { background-color: var(--bg); color: var(--secondary); line-height: 1.6; }
+
+    .header { background: var(--primary); color: white; padding: 2rem; text-align: center; border-bottom-left-radius: 40px; border-bottom-right-radius: 40px; margin-bottom: 2rem; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+
+    .container { max-width: 1100px; margin: auto; display: grid; grid-template-columns: 1fr 380px; gap: 2rem; padding: 0 20px 40px; }
+
+    /* Menu de Produtos */
+    .grid-produtos { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 1.5rem; }
+    .produto-card { background: var(--card-bg); border-radius: 20px; overflow: hidden; transition: transform 0.3s; box-shadow: 0 5px 15px rgba(0,0,0,0.05); border: 1px solid #eee; }
+    .produto-card:hover { transform: translateY(-5px); }
+    .produto-img { width: 100%; height: 160px; object-fit: cover; background: #ddd; }
+    .produto-info { padding: 1.2rem; }
+    .produto-preco { color: var(--primary); font-weight: 700; font-size: 1.2rem; display: block; margin: 0.5rem 0; }
+    .btn-add { width: 100%; background: var(--primary); color: white; border: none; padding: 10px; border-radius: 12px; cursor: pointer; font-weight: 600; transition: 0.2s; }
+    .btn-add:hover { filter: brightness(1.1); }
+
+    /* Checkout Sidebar */
+    .checkout-side { background: white; border-radius: 25px; padding: 1.5rem; position: sticky; top: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); height: fit-content; }
+    .carrinho-vazio { text-align: center; color: #888; padding: 20px; }
+    .item-carrinho { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; padding-bottom: 0.5rem; border-bottom: 1px solid #f0f0f0; }
+    
+    .total-box { font-size: 1.4rem; font-weight: 700; text-align: center; margin: 1.5rem 0; padding: 15px; background: #fff5f5; border-radius: 15px; color: var(--primary); }
+
+    /* Abas de Pagamento */
+    .tabs { display: flex; gap: 10px; margin-bottom: 1.5rem; }
+    .tab { flex: 1; padding: 10px; border-radius: 10px; text-align: center; cursor: pointer; background: #eee; font-size: 0.9rem; font-weight: 600; }
+    .tab.active { background: var(--secondary); color: white; }
+
+    input { width: 100%; padding: 12px; margin-bottom: 10px; border: 1.5px solid #eee; border-radius: 10px; outline: none; }
+    input:focus { border-color: var(--primary); }
+    
+    .btn-finalizar { width: 100%; background: #27ae60; color: white; border: none; padding: 15px; border-radius: 15px; font-size: 1.1rem; font-weight: 700; cursor: pointer; }
+
+    @media (max-width: 850px) { .container { grid-template-columns: 1fr; } }
   </style>
 </head>
 <body>
+
+<header class="header">
+  <h1>🍔 Lanchão Caraguá</h1>
+  <p>O melhor sabor do litoral no seu prato</p>
+</header>
+
 <div class="container">
   <div class="cardapio">
-    <h2>🍔 Cardápio</h2>
-    <div id="produtos"></div>
+    <div class="grid-produtos" id="menu-produtos">
+      </div>
   </div>
 
-  <div class="checkout">
-    <h2>🛒 Seu Pedido</h2>
-    <div id="carrinho"></div>
-    <div id="total" style="font-weight: bold; margin: 1rem 0;"></div>
-    
+  <div class="checkout-side">
+    <h3>Seu Pedido</h3>
+    <div id="lista-carrinho">
+      <p class="carrinho-vazio">Seu carrinho está vazio</p>
+    </div>
+
+    <div class="total-box" id="total-display">R$ 0,00</div>
+
     <input type="text" id="nome" placeholder="Nome Completo">
     <input type="email" id="email" placeholder="E-mail">
-    <input type="text" id="endereco" placeholder="Endereço de Entrega">
+    <input type="text" id="endereco" placeholder="Endereço Completo">
 
-    <div class="pagamento-tabs">
-      <div class="tab active" data-method="pix">Pix</div>
-      <div class="tab" data-method="card">Cartão</div>
+    <div class="tabs">
+      <div class="tab active" onclick="setMetodo('pix')">PIX</div>
+      <div class="tab" onclick="setMetodo('card')">Cartão</div>
     </div>
 
-    <div id="pix-area">
-      <div id="qr-code-container" style="text-align:center;"></div>
-      <input type="text" id="pix-copia-cola" readonly placeholder="Código Pix">
-    </div>
-
-    <div id="card-area" style="display:none;">
-      <select id="paymentMethodId">
-        <option value="visa">Visa</option>
-        <option value="master">Mastercard</option>
-      </select>
+    <div id="area-cartao" style="display:none;">
       <input type="text" id="cardNumber" placeholder="Número do Cartão">
-      <div style="display: flex; gap: 10px;">
+      <div style="display:flex; gap:5px">
         <input type="text" id="expMonth" placeholder="MM">
         <input type="text" id="expYear" placeholder="AAAA">
         <input type="text" id="cvv" placeholder="CVV">
       </div>
-      <input type="text" id="cardholderName" placeholder="Nome no Cartão">
       <input type="text" id="docNumber" placeholder="CPF">
     </div>
 
-    <button id="pagarBtn" style="width:100%; margin-top:1rem;">Finalizar Pagamento</button>
-    <div id="status"></div>
+    <div id="area-pix" style="display:none; text-align:center;">
+       <div id="qr-code-view"></div>
+       <input type="text" id="pix-copy" readonly placeholder="Código Pix" onclick="this.select()">
+    </div>
+
+    <button class="btn-finalizar" id="pagarBtn">Pagar Agora</button>
+    <div id="status" style="margin-top:10px; text-align:center; font-weight:600;"></div>
   </div>
 </div>
 
 <script>
-  const mp = new MercadoPago('SUA_PUBLIC_KEY_AQUI'); // COLOQUE SUA KEY AQUI
-  let carrinho = [{ id: 1, nome: "Pedido Lanchão", preco: 50.00, qtd: 1 }]; // Exemplo
+  const mp = new MercadoPago('SUA_PUBLIC_KEY_AQUI'); // <--- COLOQUE SUA KEY
   let metodo = 'pix';
+  let carrinho = [];
 
-  // Lógica das abas
-  document.querySelectorAll('.tab').forEach(tab => {
-    tab.addEventListener('click', () => {
-      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-      tab.classList.add('active');
-      metodo = tab.dataset.method;
-      document.getElementById('pix-area').style.display = metodo === 'pix' ? 'block' : 'none';
-      document.getElementById('card-area').style.display = metodo === 'card' ? 'block' : 'none';
-    });
-  });
+  const produtos = [
+    { id: 1, nome: "X-Salada Especial", preco: 25.00, img: "https://images.unsplash.com/photo-1572802419224-296b0aeee0d9?w=500" },
+    { id: 2, nome: "Cheddar Bacon", preco: 32.90, img: "https://images.unsplash.com/photo-1594212699903-ec8a3eca50f5?w=500" },
+    { id: 3, nome: "Batata Suprema", preco: 18.00, img: "https://images.unsplash.com/photo-1573082883907-80c474345d31?w=500" },
+    { id: 4, nome: "Milkshake Oreo", preco: 15.00, img: "https://images.unsplash.com/photo-1572490122747-3968b75cc699?w=500" }
+  ];
 
-  async function processarPagamento() {
-    const statusDiv = document.getElementById('status');
-    const total = 50.00; // Calcule do seu carrinho real
+  function renderMenu() {
+    const grid = document.getElementById('menu-produtos');
+    grid.innerHTML = produtos.map(p => `
+      <div class="produto-card">
+        <img src="${p.img}" class="produto-img">
+        <div class="produto-info">
+          <h4>${p.nome}</h4>
+          <span class="produto-preco">R$ ${p.preco.toFixed(2)}</span>
+          <button class="btn-add" onclick="addCarrinho(${p.id})">Adicionar</button>
+        </div>
+      </div>
+    `).join('');
+  }
 
-    try {
-      statusDiv.innerText = "Processando...";
-      let payload = {
-        type: metodo,
-        amount: total,
-        description: "Pedido Lanchão",
-        payer: { email: document.getElementById('email').value }
-      };
+  function addCarrinho(id) {
+    const item = produtos.find(p => p.id === id);
+    const jaTem = carrinho.find(c => c.id === id);
+    if(jaTem) jaTem.qtd++;
+    else carrinho.push({...item, qtd: 1});
+    atualizarCarrinho();
+  }
 
-      if (metodo === 'card') {
-        const tokenResponse = await mp.fields.create('cardToken', {
+  function removerDoCarrinho(id) {
+    carrinho = carrinho.filter(i => i.id !== id);
+    atualizarCarrinho();
+  }
+
+  function atualizarCarrinho() {
+    const lista = document.getElementById('lista-carrinho');
+    const totalDisplay = document.getElementById('total-display');
+    
+    if(carrinho.length === 0) {
+      lista.innerHTML = '<p class="carrinho-vazio">Seu carrinho está vazio</p>';
+      totalDisplay.innerText = "R$ 0,00";
+      return;
+    }
+
+    let total = 0;
+    lista.innerHTML = carrinho.map(i => {
+      total += i.preco * i.qtd;
+      return `
+        <div class="item-carrinho">
+          <div><strong>${i.qtd}x</strong> ${i.nome}</div>
+          <div>R$ ${(i.preco * i.qtd).toFixed(2)} <span onclick="removerDoCarrinho(${i.id})" style="color:red; cursor:pointer; margin-left:10px;">✕</span></div>
+        </div>
+      `;
+    }).join('');
+    
+    totalDisplay.innerText = `R$ ${total.toFixed(2)}`;
+  }
+
+  function setMetodo(m) {
+    metodo = m;
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    event.target.classList.add('active');
+    document.getElementById('area-cartao').style.display = m === 'card' ? 'block' : 'none';
+    document.getElementById('area-pix').style.display = 'none';
+  }
+
+  document.getElementById('pagarBtn').addEventListener('click', async () => {
+    const status = document.getElementById('status');
+    if(carrinho.length === 0) return alert("Carrinho vazio!");
+
+    status.innerText = "Processando pagamento...";
+    
+    const total = carrinho.reduce((acc, i) => acc + (i.preco * i.qtd), 0);
+    const payerEmail = document.getElementById('email').value;
+
+    let payload = {
+      type: metodo,
+      amount: total,
+      description: "Pedido Lanchão Caraguá",
+      payer: { email: payerEmail }
+    };
+
+    if(metodo === 'card') {
+      try {
+        const tokenResp = await mp.fields.create('cardToken', {
           cardNumber: document.getElementById('cardNumber').value,
           expirationMonth: document.getElementById('expMonth').value,
           expirationYear: document.getElementById('expYear').value,
           securityCode: document.getElementById('cvv').value,
-          cardholderName: document.getElementById('cardholderName').value,
+          cardholderName: document.getElementById('nome').value,
           identification: { type: 'CPF', number: document.getElementById('docNumber').value }
         });
-        
-        payload.token = tokenResponse.id;
-        payload.paymentMethodId = document.getElementById('paymentMethodId').value;
+        payload.token = tokenResp.id;
+        payload.paymentMethodId = "visa"; // Simplificado para o exemplo
         payload.installments = 1;
-        payload.payer.identification = { type: 'CPF', number: document.getElementById('docNumber').value };
+      } catch(e) { 
+        status.innerText = "Erro nos dados do cartão";
+        return;
       }
-
-      // CHAMADA PARA A FUNÇÃO DO NETLIFY
-      const response = await fetch('/.netlify/functions/create-payment', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
-      });
-
-      const data = await response.json();
-
-      if (metodo === 'pix' && data.qr_code) {
-        document.getElementById('qr-code-container').innerHTML = `<img src="data:image/png;base64,${data.qr_code_base64}" width="200">`;
-        document.getElementById('pix-copia-cola').value = data.qr_code;
-        statusDiv.innerText = "Escaneie o QR Code!";
-      } else if (data.status === 'approved') {
-        statusDiv.innerText = "✅ Pago com sucesso!";
-      } else {
-        statusDiv.innerText = "Erro: " + (data.status_detail || "Falha no pagamento");
-      }
-
-    } catch (err) {
-      statusDiv.innerText = "Erro no sistema.";
-      console.error(err);
     }
-  }
 
-  document.getElementById('pagarBtn').addEventListener('click', processarPagamento);
+    const resp = await fetch('/.netlify/functions/create-payment', {
+      method: 'POST',
+      body: JSON.stringify(payload)
+    });
+
+    const data = await resp.json();
+
+    if(metodo === 'pix' && data.qr_code) {
+      document.getElementById('area-pix').style.display = 'block';
+      document.getElementById('qr-code-view').innerHTML = `<img src="data:image/png;base64,${data.qr_code_base64}" width="150">`;
+      document.getElementById('pix-copy').value = data.qr_code;
+      status.innerText = "Aguardando pagamento via Pix...";
+    } else if(data.status === 'approved') {
+      status.innerText = "✅ Pagamento aprovado! Preparando seu lanche.";
+      carrinho = []; atualizarCarrinho();
+    } else {
+      status.innerText = "❌ Falha: " + (data.status_detail || "Tente novamente");
+    }
+  });
+
+  renderMenu();
 </script>
 </body>
 </html>
