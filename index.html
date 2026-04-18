@@ -213,37 +213,60 @@
   <p style="margin-top: 50px; font-size: 0.8rem; opacity: 0.5;">&copy; 2026 Lanchão Caraguá. Feito com ❤️ no litoral.</p>
 </footer>
 
+
+
+
+
+
+
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
-  // 1. Inteligência do Mapa e Motoboys (Andando pela cidade)
-  const map = L.map('mini-mapa', { zoomControl: false, attributionControl: false }).setView([-23.6226, -45.4124], 15);
+  // 1. Configuração do Mapa
+  const map = L.map('mini-mapa', { 
+    zoomControl: false, 
+    attributionControl: false,
+    dragging: false, // Trava o mapa para focar na animação
+    scrollWheelZoom: false 
+  }).setView([-23.6226, -45.4124], 16);
+
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
   
-  const motoIcon = L.divIcon({ html: '<i class="fas fa-motorcycle" style="color:#e63946; font-size: 20px; text-shadow: 2px 2px 5px rgba(0,0,0,0.3);"></i>', className: 'dummy' });
+  // Ícone estilo WAZE (Carrinho Colorido)
+  const wazeIcon = L.divIcon({ 
+    html: `<div style="background: #33ccff; width: 22px; height: 22px; border-radius: 50% 50% 50% 0; transform: rotate(-45deg); border: 2px solid white; box-shadow: 0 2px 5px rgba(0,0,0,0.3); position: relative;">
+             <div style="width: 8px; height: 8px; background: white; border-radius: 50%; position: absolute; top: 4px; left: 4px;"></div>
+           </div>`, 
+    className: 'dummy' 
+  });
   
-  // Criamos motoboys com direções aleatórias
+  // Criamos motoboys (estilo Waze) em pontos estratégicos das ruas
   const motoboys = [
-    { marker: L.marker([-23.6226, -45.4124], {icon: motoIcon}).addTo(map), angle: Math.random() * 360 },
-    { marker: L.marker([-23.6210, -45.4100], {icon: motoIcon}).addTo(map), angle: Math.random() * 360 },
-    { marker: L.marker([-23.6240, -45.4150], {icon: motoIcon}).addTo(map), angle: Math.random() * 360 }
+    { marker: L.marker([-23.6226, -45.4124], {icon: wazeIcon}).addTo(map), dir: 'lat', val: 0.00005 },
+    { marker: L.marker([-23.6215, -45.4110], {icon: wazeIcon}).addTo(map), dir: 'lng', val: -0.00005 },
+    { marker: L.marker([-23.6235, -45.4140], {icon: wazeIcon}).addTo(map), dir: 'lat', val: -0.00005 }
   ];
 
   function moverMotoboys() {
     motoboys.forEach(m => {
       let curr = m.marker.getLatLng();
-      // Calcula nova posição baseada no ângulo (faz eles andarem em linha reta e mudarem de vez em quando)
-      let speed = 0.0002; 
-      let newLat = curr.lat + Math.sin(m.angle) * speed;
-      let newLng = curr.lng + Math.cos(m.angle) * speed;
+      
+      // Move o motoboy apenas em uma direção por vez (como se estivesse em uma rua)
+      if (m.dir === 'lat') {
+        m.marker.setLatLng([curr.lat + m.val, curr.lng]);
+      } else {
+        m.marker.setLatLng([curr.lat, curr.lng + m.val]);
+      }
 
-      // Se sair muito longe do centro, vira de volta
-      if (Math.abs(newLat - (-23.6226)) > 0.01) m.angle += 180;
+      // Se andar muito (chegar em um "cruzamento" imaginário), ele muda de direção
+      if (Math.random() > 0.98) {
+        m.dir = m.dir === 'lat' ? 'lng' : 'lat'; // Vira a esquina
+        m.val = Math.random() > 0.5 ? 0.00005 : -0.00005; // Decide se vai pra frente ou trás
+      }
 
-      m.marker.setLatLng([newLat, newLng]);
-      // Pequena chance de mudar de direção (curva na rua)
-      if(Math.random() > 0.95) m.angle = Math.random() * 360;
+      // Limite para não fugir do mapa de Caraguá
+      if (Math.abs(curr.lat - (-23.6226)) > 0.005) m.val *= -1;
     });
-    requestAnimationFrame(moverMotoboys);
+    setTimeout(() => { requestAnimationFrame(moverMotoboys); }, 50); // Reduzi a velocidade para ficar "certinho"
   }
   moverMotoboys();
 
@@ -263,7 +286,7 @@
     document.getElementById('auth-modal').style.display = 'none';
   }
 
-  // 3. Lógica do Cardápio (Baseada no seu código anterior)
+  // 3. Lógica do Cardápio
   const produtos = [
     { id: 1, nome: "X-Salada Especial", preco: 25.0, desc: "Blend bovino 150g, queijo, alface e tomate.", img: "https://images.unsplash.com/photo-1572802419224-296b0aeee0d9?w=500" },
     { id: 2, nome: "Cheddar Bacon", preco: 32.9, desc: "Muito bacon crocante e cheddar cremoso.", img: "https://images.unsplash.com/photo-1594212699903-ec8a3eca50f5?w=500" },
@@ -295,13 +318,26 @@
 
   function atualizarCarrinho() {
     const lista = document.getElementById('lista-carrinho');
+    const totalDisplay = document.getElementById('total-display');
     const total = carrinho.reduce((a, b) => a + b.preco, 0);
+    
+    if(carrinho.length === 0) {
+      lista.innerHTML = '<p class="carrinho-vazio">Seu carrinho está vazio</p>';
+      totalDisplay.innerText = "R$ 0,00";
+      return;
+    }
+
     lista.innerHTML = carrinho.map(i => `<div style="display:flex; justify-content:space-between; margin-bottom:10px; font-size:0.9rem; border-bottom:1px solid #eee; padding-bottom:5px;"><span>${i.nome}</span><strong>R$ ${i.preco.toFixed(2)}</strong></div>`).join('');
-    document.getElementById('total-display').innerText = `R$ ${total.toFixed(2)}`;
-    if(carrinho.length === 0) lista.innerHTML = '<p class="carrinho-vazio">Seu carrinho está vazio</p>';
+    totalDisplay.innerText = `R$ ${total.toFixed(2)}`;
   }
 
   renderMenu();
 </script>
+  
+
+
+
+
+  
 </body>
 </html>
