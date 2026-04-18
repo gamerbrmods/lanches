@@ -727,6 +727,72 @@ function displayPix(data) {
   });
 
   renderMenu();
+
+
+
+
+
+
+
+  document.getElementById('pagarBtn').addEventListener('click', async () => {
+  const status = document.getElementById('status');
+  const btn = document.getElementById('pagarBtn');
+
+  // 1. CAPTURA DOS CAMPOS
+  const nome = document.getElementById('nome').value.trim();
+  const telefone = document.getElementById('número').value.trim();
+  const endereco = document.getElementById('endereco').value.trim();
+  const email = document.getElementById('email').value.trim();
+
+  // 2. VALIDAÇÃO OBRIGATÓRIA
+  if (carrinho.length === 0) {
+    mostrarAlerta("Carrinho Vazio", "Adicione pelo menos um item antes de pagar.");
+    return;
+  }
+
+  if (nome === "" || telefone === "" || endereco === "") {
+    mostrarAlerta("Campos Incompletos", "Por favor, preencha Nome, Telefone e Endereço para entrega.");
+    return;
+  }
+
+  // Se passou na validação, começa o processo de pagamento
+  btn.disabled = true;
+  btn.innerHTML = `Processando...`;
+
+  const total = carrinho.reduce((acc, i) => acc + (i.preco * i.qtd), 0);
+
+  let payload = {
+    type: metodo,
+    amount: total,
+    description: "Pedido Lanchão Caraguá",
+    payer: { 
+      email: email,
+      first_name: nome,
+      phone: { number: telefone }
+    },
+    metadata: { endereco_entrega: endereco } // Opcional: envia o endereço para o log do MP
+  };
+
+  // ... (restante da sua lógica de fetch para o Netlify)
+  try {
+    const resp = await fetch('/.netlify/functions/create-payment', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+
+    const data = await resp.json();
+
+    if (metodo === 'pix' && data.qr_code) {
+      displayPix(data); // O QR Code só será montado aqui após o sucesso da API
+    } 
+    // ... restante do código
+  } catch (err) {
+    showStatus("Erro ao conectar com o servidor.", "error");
+    resetBtn(btn);
+  }
+});
+  
 </script>
 </body>
 </html>
