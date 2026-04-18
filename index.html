@@ -429,6 +429,18 @@ let metodo = 'pix'; // ADICIONE ESTA LINHA AQUI
 
   let carrinho = [];
 
+
+
+  function mostrarAlerta(titulo, msg) {
+    document.getElementById('alert-title').innerText = titulo;
+    document.getElementById('alert-message').innerText = msg;
+    document.getElementById('custom-alert').style.display = 'flex';
+  }
+  function closeAlert() { document.getElementById('custom-alert').style.display = 'none'; }
+  function showAuth() { document.getElementById('auth-modal').style.display = 'flex'; }
+  function closeAuth() { document.getElementById('auth-modal').style.display = 'none'; }
+  
+
   
   function addCarrinho(id) {
     const p = produtos.find(i => i.id === id);
