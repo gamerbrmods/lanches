@@ -123,6 +123,38 @@ textarea:focus {
     border-color: var(--primary);
     background: #fffafa;
 }
+
+
+
+
+    /* Limita o tamanho do QR Code e centraliza */
+.qr-img {
+    max-width: 200px; /* Define um tamanho fixo razoável */
+    width: 100%;
+    height: auto;
+    margin: 0 auto;
+    display: block;
+    border-radius: 10px;
+}
+
+#qr-code-view {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: #fff;
+    padding: 15px;
+    border: 1px solid #eee;
+    margin-top: 10px;
+}
+
+/* Ajuste no campo Copia e Cola para não vazar */
+#pix-copy {
+    cursor: pointer;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow: hidden;
+}
+    
     
     .top-bar {
         position: absolute;
