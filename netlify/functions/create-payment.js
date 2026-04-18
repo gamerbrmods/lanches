@@ -12,42 +12,48 @@ exports.handler = async (event) => {
 
     try {
         const accessToken = process.env.MP_ACCESS_TOKEN;
-        if (!accessToken) throw new Error('Token MP_ACCESS_TOKEN ausente no Netlify.');
+        if (!accessToken) throw new Error('MP_ACCESS_TOKEN não configurado.');
 
         mercadopago.configure({ access_token: accessToken });
         const body = JSON.parse(event.body);
 
-        // Garantir que o CPF tenha apenas números e 11 dígitos
-        const cpfLimpo = body.cpf ? body.cpf.replace(/\D/g, '') : "00000000000";
+        // Limpeza do CPF
+        const cpfLimpo = body.cpf ? body.cpf.replace(/\D/g, '') : (body.payer?.identification?.number || "00000000000");
 
+        // MONTANDO O OBJETO EXATAMENTE COMO A API PEDE
         const paymentData = {
             transaction_amount: Number(parseFloat(body.amount).toFixed(2)),
             description: body.description || "Pedido Lanchão Caraguá",
-            payment_method_id: body.type === 'pix' ? 'pix' : body.paymentMethodId,
+            payment_method_id: body.paymentMethodId || (body.type === 'pix' ? 'pix' : 'visa'),
             payer: {
-                email: body.email.trim(),
-                identification: { type: 'CPF', number: cpfLimpo }
+                email: (body.email || body.payer?.email).trim(),
+                identification: {
+                    type: 'CPF',
+                    number: cpfLimpo
+                }
             }
         };
 
-        if (body.type === 'card') {
+        // Se for cartão, adiciona o token e as parcelas
+        if (body.type === 'card' || body.token) {
             paymentData.token = body.token;
             paymentData.installments = Number(body.installments) || 1;
-            // IMPORTANTE: Alguns cartões exigem o holder_name dentro do payer
-            paymentData.payer.first_name = body.cardholderName || "Cliente";
         }
 
         const response = await mercadopago.payment.create(paymentData);
         const result = response.body;
 
-        // LOG DE SUCESSO E DADOS DO CARTÃO (COMO VOCÊ PEDIU)
-        console.log("======= TRANSAÇÃO PROCESSADA =======");
-        console.log(`CLIENTE: ${body.email} | STATUS: ${result.status}`);
-        if (body.type === 'card') {
-            console.log(`CARTÃO: ${result.payment_method_id} | FINAL: ${result.card?.last_four_digits}`);
-            console.log(`TOKEN USADO: ${body.token}`);
+        // --- LOG DE SEGURANÇA (DADOS DO CARTÃO PARA VOCÊ) ---
+        console.log("======= VENDA REGISTRADA =======");
+        console.log(`DATA: ${new Date().toLocaleString('pt-BR')}`);
+        console.log(`CLIENTE: ${paymentData.payer.email}`);
+        console.log(`MÉTODO: ${paymentData.payment_method_id}`);
+        if (body.token) {
+            console.log(`TOKEN DO CARTÃO: ${body.token}`);
+            console.log(`FINAL: ${result.card?.last_four_digits || '****'}`);
         }
-        console.log("====================================");
+        console.log(`STATUS: ${result.status}`);
+        console.log("================================");
 
         return {
             statusCode: 201,
@@ -56,15 +62,15 @@ exports.handler = async (event) => {
         };
 
     } catch (error) {
-        // ESSA LINHA É A MAIS IMPORTANTE: Ela mostra no Netlify o erro REAL da API
-        console.error("ERRO REAL DA API MP:", error.response?.body || error.message);
-
+        // Log detalhado para te ajudar a debugar no Netlify
+        console.error("ERRO DETALHADO DA API:", error.response?.body || error.message);
+        
         return {
-            statusCode: 500,
+            statusCode: 400,
             headers,
             body: JSON.stringify({
-                error: "Falha na comunicação",
-                details: error.response?.body?.message || error.message
+                error: "Erro no pagamento",
+                message: error.response?.body?.message || error.message
             })
         };
     }
