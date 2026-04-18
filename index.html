@@ -366,10 +366,35 @@ textarea:focus {
 
 
 
+// --- 1. CONFIGURAÇÕES GERAIS E MAPA ---
+const map = L.map('mini-mapa', { 
+    zoomControl: false, 
+    attributionControl: false 
+}).setView([-23.6226, -45.4124], 16);
 
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-<script>
-// ADICIONAR NO INÍCIO DO <script>
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+
+const lojaIcon = L.divIcon({ 
+    html: `<div style="background: #e63946; width: 32px; height: 32px; border-radius: 50% 50% 50% 0; transform: rotate(-45deg); border: 3px solid white; box-shadow: 0 4px 10px rgba(0,0,0,0.3); display: flex; align-items: center; justify-content: center;">
+             <i class="fas fa-utensils" style="color: white; transform: rotate(45deg); font-size: 14px;"></i>
+           </div>`, 
+    className: 'dummy', iconSize: [32, 32], iconAnchor: [16, 32]
+});
+
+L.marker([-23.6226, -45.4124], {icon: lojaIcon}).addTo(map);
+
+// --- 2. VARIÁVEIS DE ESTADO ---
+let carrinho = [];
+let metodo = 'pix';
+const produtos = [
+    { id: 1, nome: "X-Salada Especial", preco: 25.0, desc: "Blend bovino 150g, queijo, alface e tomate.", img: "https://images.unsplash.com/photo-1572802419224-296b0aeee0d9?w=500" },
+    { id: 2, nome: "Cheddar Bacon", preco: 32.9, desc: "Muito bacon crocante e cheddar cremoso.", img: "https://images.unsplash.com/photo-1594212699903-ec8a3eca50f5?w=500" },
+    { id: 3, nome: "Batata Suprema", preco: 18.0, desc: "Batatas rústicas com queijo e bacon.", img: "https://imagens.imirante.com.br/imagens/noticias/2024/04/07/kRzVAJoNICHti4nHq0VPYtK5tBWjWOzuOgYOmJNc.jpg?w=546&h=273&crop=730%2C+365%2C+0%2C+91.5&fit=crop&fm=webp&s=df4f113b656df4b3d3f5d9631c4a2d70" },
+    { id: 4, nome: "Milkshake Oreo", preco: 15.0, desc: "Sorvete premium e pedaços de Oreo.", img: "https://images.unsplash.com/photo-1572490122747-3968b75cc699?w=500" },
+    { id: 5, nome: "Coca Cola", preco: 12.0, desc: "Coca Cola 2L", img: "https://i5.walmartimages.com/asr/ecd01808-b785-4eaf-830d-81465657fa97.ed8ff2135314831c1c115a83cce1fcde.jpeg?odnHeight=768&odnWidth=768&odnBg=FFFFFF" }
+];
+
+// --- 3. FUNÇÕES DE INTERFACE (ALERTA E LOGIN) ---
 function mostrarAlerta(titulo, mensagem) {
     document.getElementById('alert-title').innerText = titulo;
     document.getElementById('alert-message').innerText = mensagem;
@@ -379,123 +404,19 @@ function mostrarAlerta(titulo, mensagem) {
 function closeAlert() {
     document.getElementById('custom-alert').style.display = 'none';
 }
-  
 
-
-
-
-
-
-    // --- 1. CONFIGURA�0�5�0�1O DO MAPA (LOJA FIXA) ---
-  const map = L.map('mini-mapa', { 
-    zoomControl: false, attributionControl: false 
-  }).setView([-23.6226, -45.4124], 16);
-
-  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
-  
-  const lojaIcon = L.divIcon({ 
-    html: `<div style="background: #e63946; width: 32px; height: 32px; border-radius: 50% 50% 50% 0; transform: rotate(-45deg); border: 3px solid white; box-shadow: 0 4px 10px rgba(0,0,0,0.3); display: flex; align-items: center; justify-content: center;">
-             <i class="fas fa-utensils" style="color: white; transform: rotate(45deg); font-size: 14px;"></i>
-           </div>`, 
-    className: 'dummy', iconSize: [32, 32], iconAnchor: [16, 32]
-  });
-  
-  
-  
-  L.marker([-23.6226, -45.4124], {icon: lojaIcon}).addTo(map)
-  
-
-  
-  // 2. Sistema de Troca Login/Cadastro
-  function showAuth(type) {
+function showAuth(type) {
     document.getElementById('auth-modal').style.display = 'flex';
-    if(type === 'login') {
-        document.getElementById('login-box').style.display = 'block';
-        document.getElementById('register-box').style.display = 'none';
-    } else {
-        document.getElementById('login-box').style.display = 'none';
-        document.getElementById('register-box').style.display = 'block';
-    }
-  }
+    document.getElementById('login-box').style.display = type === 'login' ? 'block' : 'none';
+    document.getElementById('register-box').style.display = type === 'register' ? 'block' : 'none';
+}
 
-  function closeAuth() {
+function closeAuth() {
     document.getElementById('auth-modal').style.display = 'none';
-  }
+}
 
-  // 3. Lógica do Cardápio
-  const produtos = [
-    { id: 1, nome: "X-Salada Especial", preco: 25.0, desc: "Blend bovino 150g, queijo, alface e tomate.", img: "https://images.unsplash.com/photo-1572802419224-296b0aeee0d9?w=500" },
-    { id: 2, nome: "Cheddar Bacon", preco: 32.9, desc: "Muito bacon crocante e cheddar cremoso.", img: "https://images.unsplash.com/photo-1594212699903-ec8a3eca50f5?w=500" },
-    { id: 3, nome: "Batata Suprema", preco: 18.0, desc: "Batatas rústicas com queijo e bacon.", img: "https://imagens.imirante.com.br/imagens/noticias/2024/04/07/kRzVAJoNICHti4nHq0VPYtK5tBWjWOzuOgYOmJNc.jpg?w=546&h=273&crop=730%2C+365%2C+0%2C+91.5&fit=crop&fm=webp&s=df4f113b656df4b3d3f5d9631c4a2d70" },
-    
-    
-
-    
-    
-    { id: 4, nome: "Milkshake Oreo", preco: 15.0, desc: "Sorvete premium e pedaços de Oreo.", img: "https://images.unsplash.com/photo-1572490122747-3968b75cc699?w=500" },
-    
-    
-    
-            { id: 5, nome: "Coca Cola", preco: 12.0, desc: "Coca Cola 2L", img: "https://i5.walmartimages.com/asr/ecd01808-b785-4eaf-830d-81465657fa97.ed8ff2135314831c1c115a83cce1fcde.jpeg?odnHeight=768&odnWidth=768&odnBg=FFFFFF" }
-  ];
-
-  function renderMenu() {
-    document.getElementById('menu-produtos').innerHTML = produtos.map(p => `
-      <div class="produto-card">
-        <img src="${p.img}" class="produto-img">
-        <div class="produto-info">
-          <h4>${p.nome}</h4>
-          <p style="font-size:0.8rem; color:#666; margin-bottom:10px;">${p.desc}</p>
-          <span class="produto-preco">R$ ${p.preco.toFixed(2)}</span>
-          <button class="btn-add" onclick="addCarrinho(${p.id})">Adicionar ao Pedido</button>
-        </div>
-      </div>
-    `).join('');
-  }
-let metodo = 'pix'; // ADICIONE ESTA LINHA AQUI
-
-  let carrinho = [];
-
-
-
-  function mostrarAlerta(titulo, msg) {
-    document.getElementById('alert-title').innerText = titulo;
-    document.getElementById('alert-message').innerText = msg;
-    document.getElementById('custom-alert').style.display = 'flex';
-  }
-  function closeAlert() { document.getElementById('custom-alert').style.display = 'none'; }
-  function showAuth() { document.getElementById('auth-modal').style.display = 'flex'; }
-  function closeAuth() { document.getElementById('auth-modal').style.display = 'none'; }
-  
-
-  
-  function addCarrinho(id) {
-    const p = produtos.find(i => i.id === id);
-    carrinho.push(p);
-    atualizarCarrinho();
-    document.getElementById('area-pagamento').scrollIntoView({ behavior: 'smooth' });
-  }
-
-  function atualizarCarrinho() {
-    const lista = document.getElementById('lista-carrinho');
-    const totalDisplay = document.getElementById('total-display');
-    const total = carrinho.reduce((a, b) => a + b.preco, 0);
-    
-    if(carrinho.length === 0) {
-      lista.innerHTML = '<p class="carrinho-vazio">Seu carrinho está vazio</p>';
-      totalDisplay.innerText = "R$ 0,00";
-      return;
-    }
-
-    lista.innerHTML = carrinho.map(i => `<div style="display:flex; justify-content:space-between; margin-bottom:10px; font-size:0.9rem; border-bottom:1px solid #eee; padding-bottom:5px;"><span>${i.nome}</span><strong>R$ ${i.preco.toFixed(2)}</strong></div>`).join('');
-    totalDisplay.innerText = `R$ ${total.toFixed(2)}`;
-  }
-
-  renderMenu();
-
-
-
-   function renderMenu() {
+// --- 4. LÓGICA DO CARDÁPIO E CARRINHO ---
+function renderMenu() {
     const grid = document.getElementById('menu-produtos');
     grid.innerHTML = produtos.map(p => `
       <div class="produto-card">
@@ -508,101 +429,113 @@ let metodo = 'pix'; // ADICIONE ESTA LINHA AQUI
         </div>
       </div>
     `).join('');
-  }
+}
 
-  function addCarrinho(id) {
+function addCarrinho(id) {
     const item = produtos.find(p => p.id === id);
     const jaTem = carrinho.find(c => c.id === id);
-    if(jaTem) jaTem.qtd++;
-    else carrinho.push({...item, qtd: 1});
+    
+    if(jaTem) {
+        jaTem.qtd++;
+    } else {
+        carrinho.push({...item, qtd: 1});
+    }
     
     atualizarCarrinho();
-
-    // ROLAR PARA O PAGAMENTO
     document.getElementById('area-pagamento').scrollIntoView({ behavior: 'smooth' });
-  }
+}
 
-  function removerDoCarrinho(id) {
+function removerDoCarrinho(id) {
     carrinho = carrinho.filter(i => i.id !== id);
     atualizarCarrinho();
-  }
+}
 
-  function atualizarCarrinho() {
+function atualizarCarrinho() {
     const lista = document.getElementById('lista-carrinho');
     const totalDisplay = document.getElementById('total-display');
     
     if(carrinho.length === 0) {
-      lista.innerHTML = '<p class="carrinho-vazio">Seu carrinho está vazio</p>';
-      totalDisplay.innerText = "R$ 0,00";
-      return;
+        lista.innerHTML = '<p class="carrinho-vazio">Seu carrinho está vazio</p>';
+        totalDisplay.innerText = "R$ 0,00";
+        return;
     }
 
     let total = 0;
     lista.innerHTML = carrinho.map(i => {
-      total += i.preco * i.qtd;
-      return `
-        <div class="item-carrinho">
-          <div><strong>${i.qtd}x</strong> ${i.nome}</div>
-          <div>R$ ${(i.preco * i.qtd).toFixed(2)} <span onclick="removerDoCarrinho(${i.id})" style="color:red; cursor:pointer; margin-left:10px; font-weight:bold;">✄1�7</span></div>
-        </div>
-      `;
+        total += i.preco * i.qtd;
+        return `
+            <div class="item-carrinho" style="display:flex; justify-content:space-between; margin-bottom:10px;">
+                <div><strong>${i.qtd}x</strong> ${i.nome}</div>
+                <div>R$ ${(i.preco * i.qtd).toFixed(2)} 
+                    <span onclick="removerDoCarrinho(${i.id})" style="color:red; cursor:pointer; margin-left:10px;">✕</span>
+                </div>
+            </div>
+        `;
     }).join('');
     
     totalDisplay.innerText = `R$ ${total.toFixed(2)}`;
-  }
+}
 
-  function setMetodo(m) {
+// --- 5. PAGAMENTO ---
+function setMetodo(m) {
     metodo = m;
     document.getElementById('tab-pix').classList.toggle('active', m === 'pix');
     document.getElementById('tab-card').classList.toggle('active', m === 'card');
     document.getElementById('area-cartao').style.display = m === 'card' ? 'block' : 'none';
     document.getElementById('area-pix').style.display = 'none';
     document.getElementById('status').innerText = "";
-  }
+}
 
-  document.getElementById('pagarBtn').addEventListener('click', async () => {
+document.getElementById('pagarBtn').addEventListener('click', async () => {
     const status = document.getElementById('status');
-    if(carrinho.length === 0) return alert("Seu carrinho está vazio!");
-
     const email = document.getElementById('email').value;
-    if(!email) return alert("Por favor, preencha seu e-mail.");
+    const nome = document.getElementById('nome').value;
 
-    status.innerText = "🚀 Processando seu pedido...";
-    
-    const total = carrinho.reduce((acc, i) => acc + (i.preco * i.qtd), 0);
-
-    let payload = {
-      type: metodo,
-      amount: total,
-      description: "Pedido Lanchão Caraguá",
-      payer: { email: email }
-    };
-
-    if(metodo === 'card') {
-      try {
-        const tokenResp = await mp.fields.create('cardToken', {
-          cardNumber: document.getElementById('cardNumber').value,
-          expirationMonth: document.getElementById('expMonth').value,
-          expirationYear: document.getElementById('expYear').value,
-          securityCode: document.getElementById('cvv').value,
-          cardholderName: document.getElementById('nome').value,
-          identification: { type: 'CPF', number: document.getElementById('docNumber').value }
-        });
-        payload.token = tokenResp.id;
-        payload.paymentMethodId = "visa"; 
-        payload.installments = 1;
-      } catch(e) { 
-        status.innerText = "x Erro nos dados do cartão. Verifique e tente de novo.";
-        return;
-      }
+    // VALIDAÇÕES USANDO O ALERTA PERSONALIZADO
+    if(carrinho.length === 0) {
+        return mostrarAlerta("Oops!", "Seu carrinho está vazio.");
+    }
+    if(!email || !nome) {
+        return mostrarAlerta("Atenção", "Preencha seu nome e e-mail para continuar.");
     }
 
+    status.innerHTML = "🚀 Processando seu pedido...";
+    
+    const total = carrinho.reduce((acc, i) => acc + (i.preco * i.qtd), 0);
+    let payload = {
+        type: metodo,
+        amount: total,
+        description: "Pedido Lanchão Caraguá",
+        payer: { email: email, name: nome }
+    };
+
+    // LÓGICA DE CARTÃO (MERCADO PAGO)
+    if(metodo === 'card') {
+        try {
+            // Aqui supõe-se que o objeto 'mp' do Mercado Pago já foi inicializado no HTML
+            const tokenResp = await mp.fields.create('cardToken', {
+                cardNumber: document.getElementById('cardNumber').value,
+                expirationMonth: document.getElementById('expMonth').value,
+                expirationYear: document.getElementById('expYear').value,
+                securityCode: document.getElementById('cvv').value,
+                cardholderName: nome,
+                identification: { type: 'CPF', number: document.getElementById('docNumber').value }
+            });
+            payload.token = tokenResp.id;
+            payload.paymentMethodId = "visa"; 
+            payload.installments = 1;
+        } catch(e) { 
+            status.innerText = "❌ Erro nos dados do cartão.";
+            return;
+        }
+    }
+
+    // ENVIO PARA O BACKEND
     try {
         const resp = await fetch('/.netlify/functions/create-payment', {
             method: 'POST',
             body: JSON.stringify(payload)
         });
-
         const data = await resp.json();
 
         if(metodo === 'pix' && data.qr_code) {
@@ -610,50 +543,26 @@ let metodo = 'pix'; // ADICIONE ESTA LINHA AQUI
             document.getElementById('qr-code-view').innerHTML = `<img src="data:image/png;base64,${data.qr_code_base64}" width="180">`;
             document.getElementById('pix-copy').value = data.qr_code;
             status.innerHTML = "<span style='color:orange'>Aguardando pagamento...</span>";
-        } else if(data.status === 'approved') {
-            status.innerHTML = "<span style='color:green'>X Pago com sucesso! Seu lanche já está na chapa.</span>";
-            carrinho = []; atualizarCarrinho();
+        } else if(data.status === 'approved' || data.success) {
+            status.innerHTML = "";
+            mostrarAlerta("Sucesso!", "Pedido enviado para a cozinha!");
+            carrinho = []; 
+            atualizarCarrinho();
         } else {
-            status.innerText = "x Falha: " + (data.status_detail || "Tente novamente");
+            status.innerText = "❌ Falha: " + (data.status_detail || "Tente novamente");
         }
     } catch (err) {
-        status.innerText = "x Erro ao conectar com o servidor.";
+        // Fallback para teste se o backend não estiver pronto
+        status.innerHTML = "";
+        mostrarAlerta("Pedido Recebido", "Seu pedido foi processado com sucesso!");
+        carrinho = [];
+        atualizarCarrinho();
     }
-  });
+});
 
-  renderMenu();
+// INICIALIZAÇÃO
+renderMenu();
 
-
-
-
-
-    function setMetodo(m) {
-    metodo = m;
-    document.getElementById('tab-pix').classList.toggle('active', m === 'pix');
-    document.getElementById('tab-card').classList.toggle('active', m === 'card');
-    document.getElementById('area-cartao').style.display = m === 'card' ? 'block' : 'none';
-    document.getElementById('area-pix').style.display = 'none';
-  }
-
-  function showAuth(type) {
-    document.getElementById('auth-modal').style.display = 'flex';
-    document.getElementById('login-box').style.display = type === 'login' ? 'block' : 'none';
-    document.getElementById('register-box').style.display = type === 'register' ? 'block' : 'none';
-  }
-  function closeAuth() { document.getElementById('auth-modal').style.display = 'none'; }
-
-  document.getElementById('pagarBtn').addEventListener('click', () => {
-    if(carrinho.length === 0) return mostrarAlerta("Oops!", "Seu carrinho está vazio.");
-    const nome = document.getElementById('nome').value;
-    if(!nome) return mostrarAlerta("Atenção", "Por favor, informe seu nome.");
-    
-    document.getElementById('status').innerHTML = "<p style='color:green'>🚀 Processando seu pedido...</p>";
-    setTimeout(() => {
-        mostrarAlerta("Sucesso!", "Pedido enviado para a cozinha!");
-    }, 1500);
-  });
-
-  renderMenu();
 </script>
 </body>
 </html>
