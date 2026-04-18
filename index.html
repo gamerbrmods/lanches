@@ -282,9 +282,7 @@ textarea:focus {
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
 
-let carrinho = []; // Você já tem essa linha
-let metodo = 'pix'; // ADICIONE ESTA LINHA AQUI
-  
+
 
 
 
@@ -356,8 +354,11 @@ let metodo = 'pix'; // ADICIONE ESTA LINHA AQUI
       </div>
     `).join('');
   }
+let metodo = 'pix'; // ADICIONE ESTA LINHA AQUI
 
   let carrinho = [];
+
+  
   function addCarrinho(id) {
     const p = produtos.find(i => i.id === id);
     carrinho.push(p);
