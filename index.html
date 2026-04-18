@@ -735,9 +735,7 @@ function displayPix(data) {
     if(!nome) return mostrarAlerta("Atenção", "Por favor, informe seu nome.");
     
     document.getElementById('status').innerHTML = "<p style='color:green'>🚀 Processando seu pedido...</p>";
-    setTimeout(() => {
-        mostrarAlerta("Sucesso!", "Pedido enviado para a cozinha!");
-    }, 1500);
+    
   });
 
   renderMenu();
