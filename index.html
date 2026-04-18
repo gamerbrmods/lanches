@@ -547,78 +547,123 @@ let metodo = 'pix'; // ADICIONE ESTA LINHA AQUI
     totalDisplay.innerText = `R$ ${total.toFixed(2)}`;
   }
 
-  function setMetodo(m) {
-    metodo = m;
-    document.getElementById('tab-pix').classList.toggle('active', m === 'pix');
-    document.getElementById('tab-card').classList.toggle('active', m === 'card');
-    document.getElementById('area-cartao').style.display = m === 'card' ? 'block' : 'none';
-    document.getElementById('area-pix').style.display = 'none';
-    document.getElementById('status').innerText = "";
+  
+function setMetodo(m) {
+  metodo = m;
+  
+  // Alterna classes de estilo nos botões de aba
+  document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+  document.getElementById(`tab-${m}`).classList.add('active');
+
+  // Transições suaves entre áreas
+  const areaCartao = document.getElementById('area-cartao');
+  const areaPix = document.getElementById('area-pix');
+  
+  if (m === 'card') {
+    areaCartao.classList.remove('hidden');
+    areaPix.classList.add('hidden');
+  } else {
+    areaCartao.classList.add('hidden');
+    areaPix.style.display = 'none'; // Reseta o PIX até o clique em pagar
+  }
+  
+  document.getElementById('status').innerHTML = "";
+}
+
+document.getElementById('pagarBtn').addEventListener('click', async () => {
+  const status = document.getElementById('status');
+  const btn = document.getElementById('pagarBtn');
+
+  // Validação Silenciosa (sem pop-up)
+  if (carrinho.length === 0) {
+    showStatus("O carrinho está vazio. Escolha uma delícia primeiro! 🍔", "error");
+    return;
   }
 
-  document.getElementById('pagarBtn').addEventListener('click', async () => {
-    const status = document.getElementById('status');
-    if(carrinho.length === 0) return alert("Seu carrinho está vazio!");
+  const email = document.getElementById('email').value;
+  if (!email || !email.includes('@')) {
+    showStatus("Insira um e-mail válido para receber o recibo.", "error");
+    return;
+  }
 
-    const email = document.getElementById('email').value;
-    if(!email) return alert("Por favor, preencha seu e-mail.");
+  // Estado de Loading no Botão
+  btn.disabled = true;
+  btn.innerHTML = `<span class="spinner"></span> Processando...`;
+  status.innerHTML = "Preparando conexão segura...";
 
-    status.innerText = "🚀 Processando seu pedido...";
-    
-    const total = carrinho.reduce((acc, i) => acc + (i.preco * i.qtd), 0);
+  const total = carrinho.reduce((acc, i) => acc + (i.preco * i.qtd), 0);
 
-    let payload = {
-      type: metodo,
-      amount: total,
-      description: "Pedido Lanchão Caraguá",
-      payer: { email: email }
-    };
+  let payload = {
+    type: metodo,
+    amount: total,
+    description: "Pedido Lanchão Caraguá",
+    payer: { email: email }
+  };
 
-    if(metodo === 'card') {
-      try {
-        const tokenResp = await mp.fields.create('cardToken', {
-          cardNumber: document.getElementById('cardNumber').value,
-          expirationMonth: document.getElementById('expMonth').value,
-          expirationYear: document.getElementById('expYear').value,
-          securityCode: document.getElementById('cvv').value,
-          cardholderName: document.getElementById('nome').value,
-          identification: { type: 'CPF', number: document.getElementById('docNumber').value }
-        });
-        payload.token = tokenResp.id;
-        payload.paymentMethodId = "visa"; 
-        payload.installments = 1;
-      } catch(e) { 
-        status.innerText = "x Erro nos dados do cartão. Verifique e tente de novo.";
-        return;
-      }
-    }
-
+  if (metodo === 'card') {
     try {
-        const resp = await fetch('/.netlify/functions/create-payment', {
-            method: 'POST',
-            body: JSON.stringify(payload)
-        });
-
-        const data = await resp.json();
-
-        if(metodo === 'pix' && data.qr_code) {
-            document.getElementById('area-pix').style.display = 'block';
-            document.getElementById('qr-code-view').innerHTML = `<img src="data:image/png;base64,${data.qr_code_base64}" width="180">`;
-            document.getElementById('pix-copy').value = data.qr_code;
-            status.innerHTML = "<span style='color:orange'>Aguardando pagamento...</span>";
-        } else if(data.status === 'approved') {
-            status.innerHTML = "<span style='color:green'>X Pago com sucesso! Seu lanche já está na chapa.</span>";
-            carrinho = []; atualizarCarrinho();
-        } else {
-            status.innerText = "x Falha: " + (data.status_detail || "Tente novamente");
-        }
-    } catch (err) {
-        status.innerText = "x Erro ao conectar com o servidor.";
+      const tokenResp = await mp.fields.create('cardToken', {
+        cardNumber: document.getElementById('cardNumber').value,
+        expirationMonth: document.getElementById('expMonth').value,
+        expirationYear: document.getElementById('expYear').value,
+        securityCode: document.getElementById('cvv').value,
+        cardholderName: document.getElementById('nome').value,
+        identification: { type: 'CPF', number: document.getElementById('docNumber').value }
+      });
+      payload.token = tokenResp.id;
+      payload.paymentMethodId = "visa"; 
+      payload.installments = 1;
+    } catch (e) {
+      showStatus("Dados do cartão inválidos. Verifique os números.", "error");
+      resetBtn(btn);
+      return;
     }
-  });
+  }
 
-  renderMenu();
+  try {
+    const resp = await fetch('/.netlify/functions/create-payment', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
 
+    const data = await resp.json();
+
+    if (metodo === 'pix' && data.qr_code) {
+      displayPix(data);
+    } else if (data.status === 'approved') {
+      showStatus("✨ <b>Pago com sucesso!</b> Seu lanche já está na chapa.", "success");
+      carrinho = []; 
+      atualizarCarrinho();
+      btn.style.display = 'none'; // Esconde botão após sucesso
+    } else {
+      showStatus("Pagamento recusado: " + (data.status_detail || "Tente outro método"), "error");
+      resetBtn(btn);
+    }
+  } catch (err) {
+    showStatus("Erro de conexão. Verifique sua internet.", "error");
+    resetBtn(btn);
+  }
+});
+
+// Funções Auxiliares para Limpeza de Código
+function showStatus(msg, type) {
+  const status = document.getElementById('status');
+  status.className = `status-msg ${type}`;
+  status.innerHTML = msg;
+}
+
+function resetBtn(btn) {
+  btn.disabled = false;
+  btn.innerHTML = "Finalizar Pedido";
+}
+
+function displayPix(data) {
+  document.getElementById('area-pix').style.display = 'block';
+  document.getElementById('qr-code-view').innerHTML = `<img src="data:image/png;base64,${data.qr_code_base64}" class="qr-img">`;
+  document.getElementById('pix-copy').value = data.qr_code;
+  showStatus("Aguardando pagamento via PIX...", "warning");
+}
 
 
 
@@ -653,6 +698,5 @@ let metodo = 'pix'; // ADICIONE ESTA LINHA AQUI
 </script>
 </body>
 </html>
-
 
 
