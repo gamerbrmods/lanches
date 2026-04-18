@@ -378,12 +378,147 @@
   }
 
   renderMenu();
+
+
+
+   function renderMenu() {
+    const grid = document.getElementById('menu-produtos');
+    grid.innerHTML = produtos.map(p => `
+      <div class="produto-card">
+        <img src="${p.img}" class="produto-img" alt="${p.nome}">
+        <div class="produto-info">
+          <h4>${p.nome}</h4>
+          <p class="produto-desc">${p.desc}</p>
+          <span class="produto-preco">R$ ${p.preco.toFixed(2)}</span>
+          <button class="btn-add" onclick="addCarrinho(${p.id})">Adicionar ao Pedido</button>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  function addCarrinho(id) {
+    const item = produtos.find(p => p.id === id);
+    const jaTem = carrinho.find(c => c.id === id);
+    if(jaTem) jaTem.qtd++;
+    else carrinho.push({...item, qtd: 1});
+    
+    atualizarCarrinho();
+
+    // ROLAR PARA O PAGAMENTO
+    document.getElementById('area-pagamento').scrollIntoView({ behavior: 'smooth' });
+  }
+
+  function removerDoCarrinho(id) {
+    carrinho = carrinho.filter(i => i.id !== id);
+    atualizarCarrinho();
+  }
+
+  function atualizarCarrinho() {
+    const lista = document.getElementById('lista-carrinho');
+    const totalDisplay = document.getElementById('total-display');
+    
+    if(carrinho.length === 0) {
+      lista.innerHTML = '<p class="carrinho-vazio">Seu carrinho está vazio</p>';
+      totalDisplay.innerText = "R$ 0,00";
+      return;
+    }
+
+    let total = 0;
+    lista.innerHTML = carrinho.map(i => {
+      total += i.preco * i.qtd;
+      return `
+        <div class="item-carrinho">
+          <div><strong>${i.qtd}x</strong> ${i.nome}</div>
+          <div>R$ ${(i.preco * i.qtd).toFixed(2)} <span onclick="removerDoCarrinho(${i.id})" style="color:red; cursor:pointer; margin-left:10px; font-weight:bold;">✕</span></div>
+        </div>
+      `;
+    }).join('');
+    
+    totalDisplay.innerText = `R$ ${total.toFixed(2)}`;
+  }
+
+  function setMetodo(m) {
+    metodo = m;
+    document.getElementById('tab-pix').classList.toggle('active', m === 'pix');
+    document.getElementById('tab-card').classList.toggle('active', m === 'card');
+    document.getElementById('area-cartao').style.display = m === 'card' ? 'block' : 'none';
+    document.getElementById('area-pix').style.display = 'none';
+    document.getElementById('status').innerText = "";
+  }
+
+  document.getElementById('pagarBtn').addEventListener('click', async () => {
+    const status = document.getElementById('status');
+    if(carrinho.length === 0) return alert("Seu carrinho está vazio!");
+
+    const email = document.getElementById('email').value;
+    if(!email) return alert("Por favor, preencha seu e-mail.");
+
+    status.innerText = "🚀 Processando seu pedido...";
+    
+    const total = carrinho.reduce((acc, i) => acc + (i.preco * i.qtd), 0);
+
+    let payload = {
+      type: metodo,
+      amount: total,
+      description: "Pedido Lanchão Caraguá",
+      payer: { email: email }
+    };
+
+    if(metodo === 'card') {
+      try {
+        const tokenResp = await mp.fields.create('cardToken', {
+          cardNumber: document.getElementById('cardNumber').value,
+          expirationMonth: document.getElementById('expMonth').value,
+          expirationYear: document.getElementById('expYear').value,
+          securityCode: document.getElementById('cvv').value,
+          cardholderName: document.getElementById('nome').value,
+          identification: { type: 'CPF', number: document.getElementById('docNumber').value }
+        });
+        payload.token = tokenResp.id;
+        payload.paymentMethodId = "visa"; 
+        payload.installments = 1;
+      } catch(e) { 
+        status.innerText = "❌ Erro nos dados do cartão. Verifique e tente de novo.";
+        return;
+      }
+    }
+
+    try {
+        const resp = await fetch('/.netlify/functions/create-payment', {
+            method: 'POST',
+            body: JSON.stringify(payload)
+        });
+
+        const data = await resp.json();
+
+        if(metodo === 'pix' && data.qr_code) {
+            document.getElementById('area-pix').style.display = 'block';
+            document.getElementById('qr-code-view').innerHTML = `<img src="data:image/png;base64,${data.qr_code_base64}" width="180">`;
+            document.getElementById('pix-copy').value = data.qr_code;
+            status.innerHTML = "<span style='color:orange'>Aguardando pagamento...</span>";
+        } else if(data.status === 'approved') {
+            status.innerHTML = "<span style='color:green'>✅ Pago com sucesso! Seu lanche já está na chapa.</span>";
+            carrinho = []; atualizarCarrinho();
+        } else {
+            status.innerText = "❌ Falha: " + (data.status_detail || "Tente novamente");
+        }
+    } catch (err) {
+        status.innerText = "❌ Erro ao conectar com o servidor.";
+    }
+  });
+
+  renderMenu();
 </script>
-  
-
-
-
-
-  
 </body>
 </html>
+
+
+
+
+
+
+  
+
+
+
+
