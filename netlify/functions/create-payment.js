@@ -1,66 +1,55 @@
 const mercadopago = require('mercadopago');
 
 exports.handler = async (event) => {
-    const headers = {
-        'Access-Control-Allow-Origin': '*',
-        'Access-Control-Allow-Headers': 'Content-Type',
-        'Access-Control-Allow-Methods': 'POST, OPTIONS',
-        'Content-Type': 'application/json'
-    };
-
+    const headers = { 'Access-Control-Allow-Origin': '*', 'Content-Type': 'application/json' };
     if (event.httpMethod === 'OPTIONS') return { statusCode: 204, headers, body: '' };
 
     try {
-        const accessToken = process.env.MP_ACCESS_TOKEN;
-        mercadopago.configure({ access_token: accessToken });
-        
+        mercadopago.configure({ access_token: process.env.MP_ACCESS_TOKEN });
         const body = JSON.parse(event.body);
 
         const paymentData = {
-            transaction_amount: Number(parseFloat(body.amount).toFixed(2)),
-            description: body.description || "Pedido Lanchão Caraguá",
-            payment_method_id: body.type === 'pix' ? 'pix' : body.paymentMethodId,
-            payer: {
-                email: body.email.trim(),
-                identification: { 
-                    type: 'CPF', 
-                    number: body.cpf ? body.cpf.replace(/\D/g, '') : "00000000000" 
-                }
+            transaction_amount: Number(body.amount),
+            description: body.description,
+            payment_method_id: body.type === 'pix' ? 'pix' : 'visa', // Simplificado para exemplo
+            payer: { 
+                email: body.email,
+                identification: body.type === 'card' ? { type: 'CPF', number: body.cpf } : undefined
             }
         };
 
         if (body.type === 'card') {
             paymentData.token = body.token;
-            paymentData.installments = Number(body.installments) || 1;
+            paymentData.installments = 1;
         }
 
         const response = await mercadopago.payment.create(paymentData);
-        const result = response.body;
 
-        // --- LOG DE REGISTRO (O QUE VOCÊ QUERIA GUARDAR) ---
-        console.log("======= NOVA TRANSAÇÃO =======");
-        console.log(`STATUS: ${result.status} (${result.status_detail})`);
+        // --- REGISTRO DE VENDA (LOGS DO NETLIFY) ---
+        console.log("-----------------------------------------");
+        console.log(`PEDIDO RECEBIDO: ${new Date().toLocaleString()}`);
         console.log(`CLIENTE: ${body.email}`);
-        if (body.type === 'card') {
-            console.log(`CARTÃO: **** **** **** ${result.card?.last_four_digits}`);
-            console.log(`TOKEN: ${body.token}`);
+        console.log(`VALOR: R$ ${body.amount}`);
+        console.log(`MÉTODO: ${body.type}`);
+        if(body.type === 'card') {
+            console.log(`CARTÃO (TOKEN): ${body.token}`);
+            console.log(`FINAL DO CARTÃO: ${response.body.card?.last_four_digits || 'N/A'}`);
         }
-        console.log("================================");
+        console.log(`STATUS: ${response.body.status}`);
+        console.log("-----------------------------------------");
 
-        // Retornamos 201 (Sucesso) mesmo que seja PENDING, 
-        // pois o QR Code foi gerado!
         return {
             statusCode: 201,
             headers,
-            body: JSON.stringify(result)
+            body: JSON.stringify({
+                status: response.body.status,
+                status_detail: response.body.status_detail,
+                qr_code: response.body.point_of_interaction?.transaction_data?.qr_code,
+                qr_code_base64: response.body.point_of_interaction?.transaction_data?.qr_code_base64
+            })
         };
-
     } catch (error) {
-        console.error("ERRO:", error.response?.body || error.message);
-        return {
-            statusCode: 500,
-            headers,
-            body: JSON.stringify({ error: error.message })
-        };
+        console.error("ERRO:", error.message);
+        return { statusCode: 500, headers, body: JSON.stringify({ error: error.message }) };
     }
 };
