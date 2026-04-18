@@ -492,6 +492,71 @@
   renderMenu();
 
 
+
+
+
+
+// 1. Inicialize o Mercado Pago com sua Chave Pública (Obtenha no painel do Mercado Pago)
+const mp = new MercadoPago('APP_USR-1334029455771509-040420-36979594d79384a46f840b2a7248226b-358581720'); 
+
+// ... (mantenha as configurações do mapa e produtos que já funcionam)
+
+// CORREÇÃO NO BOTÃO DE PAGAR
+document.getElementById('pagarBtn').addEventListener('click', async () => {
+    const status = document.getElementById('status');
+    const emailValue = document.getElementById('email').value; // Nome corrigido
+    const nomeValue = document.getElementById('nome').value;
+
+    if(carrinho.length === 0) return alert("Seu carrinho está vazio!");
+    if(!emailValue || !nomeValue) return alert("Preencha nome e e-mail.");
+
+    status.innerText = "🚀 Processando seu pedido...";
+    
+    const total = carrinho.reduce((acc, i) => acc + (i.preco * i.qtd), 0);
+
+    let payload = {
+      type: metodo,
+      amount: total,
+      description: "Pedido Lanchão Caraguá",
+      payer: { email: emailValue, name: nomeValue }
+    };
+
+    // Se for Cartão, precisa gerar o TOKEN antes de enviar para o servidor
+    if(metodo === 'card') {
+      // Nota: Para cartão funcionar 100%, você precisa usar o 'CardForm' do SDK v2.
+      status.innerText = "Utilize o método PIX para testes rápidos.";
+      return; 
+    }
+
+    try {
+        // ESSA ROTA PRECISA EXISTIR NO SEU SERVIDOR/NETLIFY
+        const resp = await fetch('/.netlify/functions/create-payment', {
+            method: 'POST',
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload)
+        });
+
+        if (!resp.ok) throw new Error("Erro na comunicação com o servidor.");
+
+        const data = await resp.json();
+
+        if(metodo === 'pix' && data.qr_code) {
+            document.getElementById('area-pix').style.display = 'block';
+            document.getElementById('qr-code-view').innerHTML = `<img src="data:image/png;base64,${data.qr_code_base64}" width="180">`;
+            document.getElementById('pix-copy').value = data.qr_code;
+            status.innerHTML = "<span style='color:orange'>Aguardando pagamento Pix...</span>";
+        } 
+        // ... restante da lógica
+    } catch (err) {
+        status.innerText = "❌ Erro: O servidor de pagamento não respondeu.";
+        console.error(err);
+    }
+});
+  
+
+
+
+
   
 </script>
 </body>
