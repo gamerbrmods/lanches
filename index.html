@@ -34,6 +34,25 @@
         position: relative;
     }
 
+
+    textarea {
+    width: 100%;
+    padding: 14px;
+    margin-bottom: 12px;
+    border: 1.5px solid #eee;
+    border-radius: 12px;
+    outline: none;
+    transition: 0.3s;
+    resize: none; /* Impede que o usuário deforme o layout puxando o canto */
+    min-height: 80px; /* Aqui você controla o quão "gordinho" ele vai ser */
+    font-family: 'Poppins', sans-serif; /* Para manter a mesma fonte */
+}
+
+textarea:focus {
+    border-color: var(--primary);
+    background: #fffafa;
+}
+    
     .top-bar {
         position: absolute;
         top: 20px;
@@ -174,8 +193,8 @@
       <input type="number" id="número" placeholder="Número Para contato!">
      <input type="text" id="endereco" placeholder="Endereço Completo de Entrega">
      
-      <input type="text" id="observação" placeholder="Adicionar observações à entrega...">
-    
+     <textarea id="observação" placeholder="Adicionar observações à entrega..." rows="3"></textarea>
+      
     </div>
 
     <div class="tabs">
