@@ -627,11 +627,33 @@ let metodo = 'pix'; // ADICIONE ESTA LINHA AQUI
 
 
 
+    function setMetodo(m) {
+    metodo = m;
+    document.getElementById('tab-pix').classList.toggle('active', m === 'pix');
+    document.getElementById('tab-card').classList.toggle('active', m === 'card');
+    document.getElementById('area-cartao').style.display = m === 'card' ? 'block' : 'none';
+    document.getElementById('area-pix').style.display = 'none';
+  }
 
+  function showAuth(type) {
+    document.getElementById('auth-modal').style.display = 'flex';
+    document.getElementById('login-box').style.display = type === 'login' ? 'block' : 'none';
+    document.getElementById('register-box').style.display = type === 'register' ? 'block' : 'none';
+  }
+  function closeAuth() { document.getElementById('auth-modal').style.display = 'none'; }
 
+  document.getElementById('pagarBtn').addEventListener('click', () => {
+    if(carrinho.length === 0) return mostrarAlerta("Oops!", "Seu carrinho está vazio.");
+    const nome = document.getElementById('nome').value;
+    if(!nome) return mostrarAlerta("Atenção", "Por favor, informe seu nome.");
+    
+    document.getElementById('status').innerHTML = "<p style='color:green'>🚀 Processando seu pedido...</p>";
+    setTimeout(() => {
+        mostrarAlerta("Sucesso!", "Pedido enviado para a cozinha!");
+    }, 1500);
+  });
 
-
-  
+  renderMenu();
 </script>
 </body>
 </html>
