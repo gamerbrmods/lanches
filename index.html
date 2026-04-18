@@ -62,6 +62,31 @@
     
 
 
+
+    .alert-overlay {
+  display: none; /* Começa escondido */
+  position: fixed;
+  top: 0; left: 0; width: 100%; height: 100%;
+  background: rgba(29, 53, 87, 0.7); /* Fundo azul escuro transparente */
+  backdrop-filter: blur(5px); /* Efeito de vidro desfocado */
+  z-index: 3000;
+  align-items: center;
+  justify-content: center;
+}
+
+.alert-box {
+  background: white;
+  padding: 2.5rem;
+  border-radius: 30px;
+  width: 90%;
+  max-width: 380px;
+  text-align: center;
+  box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+  /* Animação para ele "pular" na tela */
+  animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+    
+
     
 
     textarea {
@@ -515,7 +540,7 @@ let metodo = 'pix'; // ADICIONE ESTA LINHA AQUI
         payload.paymentMethodId = "visa"; 
         payload.installments = 1;
       } catch(e) { 
-        status.innerText = "❄1�7 Erro nos dados do cartão. Verifique e tente de novo.";
+        status.innerText = "x Erro nos dados do cartão. Verifique e tente de novo.";
         return;
       }
     }
@@ -534,13 +559,13 @@ let metodo = 'pix'; // ADICIONE ESTA LINHA AQUI
             document.getElementById('pix-copy').value = data.qr_code;
             status.innerHTML = "<span style='color:orange'>Aguardando pagamento...</span>";
         } else if(data.status === 'approved') {
-            status.innerHTML = "<span style='color:green'>✄1�7 Pago com sucesso! Seu lanche já está na chapa.</span>";
+            status.innerHTML = "<span style='color:green'>X Pago com sucesso! Seu lanche já está na chapa.</span>";
             carrinho = []; atualizarCarrinho();
         } else {
-            status.innerText = "❄1�7 Falha: " + (data.status_detail || "Tente novamente");
+            status.innerText = "x Falha: " + (data.status_detail || "Tente novamente");
         }
     } catch (err) {
-        status.innerText = "❄1�7 Erro ao conectar com o servidor.";
+        status.innerText = "x Erro ao conectar com o servidor.";
     }
   });
 
