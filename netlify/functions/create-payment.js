@@ -10,7 +10,6 @@ exports.handler = async (event) => {
   if (event.httpMethod === 'OPTIONS') return { statusCode: 204, headers, body: '' };
 
   try {
-    // O Netlify lerá isso das variáveis de ambiente que você configurar no painel
     mercadopago.configure({
       access_token: process.env.MP_ACCESS_TOKEN 
     });
@@ -19,7 +18,7 @@ exports.handler = async (event) => {
     const { type, amount, description, payer, token, installments, paymentMethodId } = body;
 
     const paymentData = {
-      transaction_amount: Number(amount),
+      transaction_amount: Number(amount.toFixed(2)),
       description: description,
       payment_method_id: type === 'pix' ? 'pix' : paymentMethodId,
       payer: payer,
